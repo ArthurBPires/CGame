@@ -15,7 +15,7 @@
 //  vira
 //    #include <cstdio> // Em C++
 //
-#include "Object.h"
+#include "Dyn_Object.h"
 
 // Estrutura que representa um modelo geométrico carregado a partir de um
 // arquivo ".obj". Veja https://en.wikipedia.org/wiki/Wavefront_.obj_file .
@@ -233,6 +233,8 @@ int main(int argc, char* argv[])
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
 
+    Dyn_Object sphere("sphere");
+    sphere.pos.x = -1.0;
     // Ficamos em loop, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
     {
@@ -308,12 +310,12 @@ int main(int argc, char* argv[])
         glUniformMatrix4fv(view_uniform       , 1 , GL_FALSE , glm::value_ptr(view));
         glUniformMatrix4fv(projection_uniform , 1 , GL_FALSE , glm::value_ptr(projection));
 
-        //Following example demonstrates all 3 uses of Object
-        Object plane("plane",vec3(0.0,-1.0,0.0),vec3(0.0,0.0,0.0),vec3(2.0,1.0,2.0),vec3(0.2,0.2,0.2),vec3(0.3,0.3,0.3),vec3(0.0,0.0,0.0),20.0);
+        //Following example demonstrates all 3 constructors of Object
+        Object plane("plane",vec4(0.0,-1.0,0.0,1.0),vec3(0.0,0.0,0.0),vec3(2.0,1.0,2.0),vec3(0.2,0.2,0.2),vec3(0.3,0.3,0.3),vec3(0.0,0.0,0.0),20.0);
         plane.draw();
 
-        Object sphere("sphere");
-        sphere.pos.x = -1.0;
+        sphere.acceleration = 0.00001f * normalize(vec4(0.0,0.0,-1.0,0.0));
+        sphere.move();
         sphere.draw();
 
         Object bunny("bunny",vec3(0.08,0.4,0.8),vec3(0.8,0.8,0.8),vec3(0.04,0.2,0.4),32.0);

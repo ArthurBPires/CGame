@@ -3,14 +3,13 @@
 
 #include "main.h"
 
-
 using namespace glm;
 
 class Object
 {
     public:
         std::string model;
-        glm::vec3 pos = vec3(0.0f,0.0f,0.0f);
+        glm::vec4 pos = vec4(0.0f,0.0f,0.0f,1.0f);
         glm::vec3 rot = vec3(0.0f,0.0f,0.0f);
         glm::vec3 scl = vec3(1.0f,1.0f,1.0f);
 
@@ -20,7 +19,7 @@ class Object
         glm::vec3 Ka = vec3(0.4,0.2,0.04); // Refletância ambiente
         float q = 1.0; // Expoente especular para o modelo de iluminação de Phong
 
-        Object(std::string model,vec3 pos, vec3 rot, vec3 scl, vec3 Kd, vec3 Ks, vec3 Ka, float q) :
+        Object(std::string model,vec4 pos, vec3 rot, vec3 scl, vec3 Kd, vec3 Ks, vec3 Ka, float q) :
             model(model),pos(pos), rot(rot), scl(scl), Kd(Kd), Ks(Ks), Ka(Ka), q(q) {};
         Object(std::string model,vec3 Kd, vec3 Ks, vec3 Ka, float q) :
             model(model), Kd(Kd), Ks(Ks), Ka(Ka), q(q) {};

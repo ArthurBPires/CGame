@@ -18,6 +18,8 @@ class Dyn_Object : public Object
 
         Dyn_Object(std::string model) : Object(model) {};
 
+        Dyn_Object(vec4 pos) : Object(pos) {};
+
         Dyn_Object(std::string model, vec4 velocity, vec4 acceleration) : Object(model),velocity(velocity), acceleration(acceleration){};
 
         void move();

@@ -1,7 +1,7 @@
 #ifndef SCENE_H
 #define SCENE_H
 
-#include "Dyn_Object.h"
+#include "Camera.h"
 #include <iostream>
 #include <experimental/filesystem>
 #include <string>
@@ -19,6 +19,7 @@ class Scene
 
         void static renderInit();
         void static renderBaseline();
+        void static renderOther();
         void static loadModels();
         void static loadModels(std::vector<std::string> paths);
         void static clearObjects();
@@ -62,6 +63,34 @@ void Scene::renderBaseline()
     // Pedimos para a GPU utilizar o programa de GPU criado acima (contendo
     // os shaders de vértice e fragmentos).
     glUseProgram(program_id);
+}
+
+void Scene::renderOther()
+{
+    // Imprimimos na tela os ângulos de Euler que controlam a rotação do
+    // terceiro cubo.
+    TextRendering_ShowEulerAngles(window);
+
+    // Imprimimos na informação sobre a matriz de projeção sendo utilizada.
+    TextRendering_ShowProjection(window);
+
+    // Imprimimos na tela informação sobre o número de quadros renderizados
+    // por segundo (frames per second).
+    TextRendering_ShowFramesPerSecond(window);
+
+    // O framebuffer onde OpenGL executa as operações de renderização não
+    // é o mesmo que está sendo mostrado para o usuário, caso contrário
+    // seria possível ver artefatos conhecidos como "screen tearing". A
+    // chamada abaixo faz a troca dos buffers, mostrando para o usuário
+    // tudo que foi renderizado pelas funções acima.
+    // Veja o link: Veja o link: https://en.wikipedia.org/w/index.php?title=Multiple_buffering&oldid=793452829#Double_buffering_in_computer_graphics
+    glfwSwapBuffers(window);
+
+    // Verificamos com o sistema operacional se houve alguma interação do
+    // usuário (teclado, mouse, ...). Caso positivo, as funções de callback
+    // definidas anteriormente usando glfwSet*Callback() serão chamadas
+    // pela biblioteca GLFW.
+    glfwPollEvents();
 }
 
 void Scene::loadModels()

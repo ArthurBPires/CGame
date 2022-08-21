@@ -25,6 +25,8 @@ class Object
             model(model), Kd(Kd), Ks(Ks), Ka(Ka), q(q) {};
         Object(std::string model) : model(model) {};
 
+        Object(vec4 pos) : pos(pos) {};
+
         void draw();
         virtual ~Object();
 

@@ -16,7 +16,8 @@ uniform mat4 projection;
 #define SPHERE 0
 #define BUNNY  1
 #define PLANE  2
-uniform int object_id;
+//uniform int object_id;
+uniform float spectral_values[10];
 
 // O valor de saída ("out") de um Fragment Shader é a cor final do fragmento.
 out vec4 color;
@@ -34,7 +35,6 @@ void main()
     // através da interpolação, feita pelo rasterizador, da posição de cada
     // vértice.
     vec4 p = position_world;
-
     // Normal do fragmento atual, interpolada pelo rasterizador a partir das
     // normais de cada vértice.
     vec4 n = normalize(normal);
@@ -53,45 +53,10 @@ void main()
     r = -l + 2*n*(dot(n,l));
 
     // Parâmetros que definem as propriedades espectrais da superfície
-    vec3 Kd; // Refletância difusa
-    vec3 Ks; // Refletância especular
-    vec3 Ka; // Refletância ambiente
-    float q; // Expoente especular para o modelo de iluminação de Phong
-
-    if ( object_id == SPHERE )
-    {
-        // PREENCHA AQUI
-        // Propriedades espectrais da esfera
-        Kd = vec3(0.8,0.4,0.08);
-        Ks = vec3(0.0,0.0,0.0);
-        Ka = Kd/2;
-        q = 1.0;
-    }
-    else if ( object_id == BUNNY )
-    {
-        // PREENCHA AQUI
-        // Propriedades espectrais do coelho
-        Kd = vec3(0.08, 0.4, 0.8);
-        Ks = vec3(0.8, 0.8, 0.8);
-        Ka = Kd/2;
-        q = 32.0;
-    }
-    else if ( object_id == PLANE )
-    {
-        // PREENCHA AQUI
-        // Propriedades espectrais do plano
-        Kd = vec3(0.2, 0.2, 0.2);
-        Ks = vec3(0.3, 0.3, 0.3);
-        Ka = vec3(0.0,0.0,0.0);
-        q = 20.0;
-    }
-    else // Objeto desconhecido = preto
-    {
-        Kd = vec3(0.0,0.0,0.0);
-        Ks = vec3(0.0,0.0,0.0);
-        Ka = vec3(0.0,0.0,0.0);
-        q = 1.0;
-    }
+    vec3 Kd = vec3(spectral_values[0], spectral_values[1], spectral_values[2]); // Refletância difusa
+    vec3 Ks = vec3(spectral_values[3], spectral_values[4], spectral_values[5]); // Refletância especular
+    vec3 Ka = vec3(spectral_values[6], spectral_values[7], spectral_values[8]); // Refletância ambiente
+    float q = spectral_values[9]; // Expoente especular para o modelo de iluminação de Phong
 
     // Espectro da fonte de iluminação
     vec3 I = vec3(1.0, 1.0, 1.0); // PREENCH AQUI o espectro da fonte de luz

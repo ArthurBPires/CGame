@@ -2,7 +2,7 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="Laboratorio_4" />
+		<Option title="CGame" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<Build>
@@ -16,6 +16,7 @@
 					<Add option="-Wall" />
 					<Add option="-std=c++11" />
 					<Add option="-g" />
+					<Add directory="include" />
 				</Compiler>
 				<Linker>
 					<Add option="-static-libstdc++" />
@@ -33,6 +34,7 @@
 					<Add option="-O2" />
 					<Add option="-Wall" />
 					<Add option="-std=c++11" />
+					<Add directory="include" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -52,6 +54,7 @@
 					<Add option="-Wall" />
 					<Add option="-std=c++11" />
 					<Add option="-g" />
+					<Add directory="include" />
 				</Compiler>
 				<Linker>
 					<Add option="lib-linux/libglfw3.a -lrt -lm -ldl -lX11 -lpthread -lXrandr -lXinerama -lXxf86vm -lXcursor" />
@@ -67,6 +70,7 @@
 					<Add option="-Wall" />
 					<Add option="-std=c++11" />
 					<Add option="-g" />
+					<Add directory="include" />
 				</Compiler>
 				<Linker>
 					<Add option="lib-mingw-32\libglfw3.a -lgdi32 -lopengl32" />
@@ -82,6 +86,7 @@
 					<Add option="-O2" />
 					<Add option="-Wall" />
 					<Add option="-std=c++11" />
+					<Add directory="include" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -98,9 +103,12 @@
 			<Add option="lib\libglfw3.a -lgdi32 -lopengl32" />
 			<Add directory="lib" />
 		</Linker>
+		<Unit filename="include/Dyn_Object.h" />
 		<Unit filename="include/GLFW/glfw3.h" />
 		<Unit filename="include/GLFW/glfw3native.h" />
 		<Unit filename="include/KHR/khrplatform.h" />
+		<Unit filename="include/Object.h" />
+		<Unit filename="include/Scene.h" />
 		<Unit filename="include/dejavufont.h" />
 		<Unit filename="include/glad/glad.h" />
 		<Unit filename="include/glm/CMakeLists.txt" />
@@ -368,6 +376,9 @@
 		<Unit filename="include/matrices.h" />
 		<Unit filename="include/tiny_obj_loader.h" />
 		<Unit filename="include/utils.h" />
+		<Unit filename="src/Dyn_Object.cpp" />
+		<Unit filename="src/Object.cpp" />
+		<Unit filename="src/Scene.cpp" />
 		<Unit filename="src/glad.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -377,9 +388,6 @@
 		<Unit filename="src/textrendering.cpp" />
 		<Unit filename="src/tiny_obj_loader.cpp" />
 		<Extensions>
-			<code_completion />
-			<envvars />
-			<debugger />
 			<lib_finder disable_auto="1" />
 		</Extensions>
 	</Project>

@@ -15,36 +15,7 @@
 //  vira
 //    #include <cstdio> // Em C++
 //
-#include <cmath>
-#include <cstdio>
-#include <cstdlib>
-
-// Headers abaixo são específicos de C++
-#include <map>
-#include <stack>
-#include <string>
-#include <vector>
-#include <limits>
-#include <fstream>
-#include <sstream>
-#include <stdexcept>
-#include <algorithm>
-
-// Headers das bibliotecas OpenGL
-#include <glad/glad.h>   // Criação de contexto OpenGL 3.3
-#include <GLFW/glfw3.h>  // Criação de janelas do sistema operacional
-
-// Headers da biblioteca GLM: criação de matrizes e vetores.
-#include <glm/mat4x4.hpp>
-#include <glm/vec4.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
-// Headers da biblioteca para carregar modelos obj
-#include <tiny_obj_loader.h>
-
-// Headers locais, definidos na pasta "include/"
-#include "utils.h"
-#include "matrices.h"
+#include "Object.h"
 
 // Estrutura que representa um modelo geométrico carregado a partir de um
 // arquivo ".obj". Veja https://en.wikipedia.org/wiki/Wavefront_.obj_file .
@@ -83,7 +54,7 @@ void PopMatrix(glm::mat4& M);
 void BuildTrianglesAndAddToVirtualScene(ObjModel*); // Constrói representação de um ObjModel como malha de triângulos para renderização
 void ComputeNormals(ObjModel* model); // Computa normais de um ObjModel, caso não existam.
 void LoadShadersFromFiles(); // Carrega os shaders de vértice e fragmento, criando um programa de GPU
-void DrawVirtualObject(const char* object_name); // Desenha um objeto armazenado em g_VirtualScene
+//void DrawVirtualObject(const char* object_name); // Desenha um objeto armazenado em g_VirtualScene
 GLuint LoadShader_Vertex(const char* filename);   // Carrega um vertex shader
 GLuint LoadShader_Fragment(const char* filename); // Carrega um fragment shader
 void LoadShader(const char* filename, GLuint shader_id); // Função utilizada pelas duas acima
@@ -118,24 +89,7 @@ void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 void CursorPosCallback(GLFWwindow* window, double xpos, double ypos);
 void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 
-// Definimos uma estrutura que armazenará dados necessários para renderizar
-// cada objeto da cena virtual.
-struct SceneObject
-{
-    std::string  name;        // Nome do objeto
-    size_t       first_index; // Índice do primeiro vértice dentro do vetor indices[] definido em BuildTrianglesAndAddToVirtualScene()
-    size_t       num_indices; // Número de índices do objeto dentro do vetor indices[] definido em BuildTrianglesAndAddToVirtualScene()
-    GLenum       rendering_mode; // Modo de rasterização (GL_TRIANGLES, GL_TRIANGLE_STRIP, etc.)
-    GLuint       vertex_array_object_id; // ID do VAO onde estão armazenados os atributos do modelo
-};
-
 // Abaixo definimos variáveis globais utilizadas em várias funções do código.
-
-// A cena virtual é uma lista de objetos nomeados, guardados em um dicionário
-// (map).  Veja dentro da função BuildTrianglesAndAddToVirtualScene() como que são incluídos
-// objetos dentro da variável g_VirtualScene, e veja na função main() como
-// estes são acessados.
-std::map<std::string, SceneObject> g_VirtualScene;
 
 // Pilha que guardará as matrizes de modelagem.
 std::stack<glm::mat4>  g_MatrixStack;
@@ -175,15 +129,6 @@ bool g_UsePerspectiveProjection = true;
 
 // Variável que controla se o texto informativo será mostrado na tela.
 bool g_ShowInfoText = true;
-
-// Variáveis que definem um programa de GPU (shaders). Veja função LoadShadersFromFiles().
-GLuint vertex_shader_id;
-GLuint fragment_shader_id;
-GLuint program_id = 0;
-GLint model_uniform;
-GLint view_uniform;
-GLint projection_uniform;
-GLint object_id_uniform;
 
 int main(int argc, char* argv[])
 {
@@ -357,41 +302,23 @@ int main(int argc, char* argv[])
             float l = -r;
             projection = Matrix_Orthographic(l, r, b, t, nearplane, farplane);
         }
-
-        glm::mat4 model = Matrix_Identity(); // Transformação identidade de modelagem
-
         // Enviamos as matrizes "view" e "projection" para a placa de vídeo
         // (GPU). Veja o arquivo "shader_vertex.glsl", onde estas são
         // efetivamente aplicadas em todos os pontos.
         glUniformMatrix4fv(view_uniform       , 1 , GL_FALSE , glm::value_ptr(view));
         glUniformMatrix4fv(projection_uniform , 1 , GL_FALSE , glm::value_ptr(projection));
 
-        #define SPHERE 0
-        #define BUNNY  1
-        #define PLANE  2
+        //Following example demonstrates all 3 uses of Object
+        Object plane("plane",vec3(0.0,-1.0,0.0),vec3(0.0,0.0,0.0),vec3(2.0,1.0,2.0),vec3(0.2,0.2,0.2),vec3(0.3,0.3,0.3),vec3(0.0,0.0,0.0),20.0);
+        plane.draw();
 
-        //Desenhamos o modelo do plano
-        model = Matrix_Translate(0.0f,-1.0f,0.0f)
-              * Matrix_Scale(2.0,1.0,2.0);
-        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(object_id_uniform, PLANE);
-        DrawVirtualObject("plane");
+        Object sphere("sphere");
+        sphere.pos.x = -1.0;
+        sphere.draw();
 
-        // Desenhamos o modelo da esfera
-        model = Matrix_Translate(-1.0f,0.0f,0.0f);
-        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(object_id_uniform, SPHERE);
-        DrawVirtualObject("sphere");
-
-        // Desenhamos o modelo do coelho
-        model = Matrix_Translate(1.0f,0.0f,0.0f)
-              * Matrix_Rotate_Z(g_AngleZ)
-              * Matrix_Rotate_Y(g_AngleY)
-              * Matrix_Rotate_X(g_AngleX);
-        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(object_id_uniform, BUNNY);
-        DrawVirtualObject("bunny");
-
+        Object bunny("bunny",vec3(0.08,0.4,0.8),vec3(0.8,0.8,0.8),vec3(0.04,0.2,0.4),32.0);
+        bunny.pos.x = 1.0;
+        bunny.draw();
 
         // Imprimimos na tela os ângulos de Euler que controlam a rotação do
         // terceiro cubo.
@@ -424,32 +351,6 @@ int main(int argc, char* argv[])
 
     // Fim do programa
     return 0;
-}
-
-// Função que desenha um objeto armazenado em g_VirtualScene. Veja definição
-// dos objetos na função BuildTrianglesAndAddToVirtualScene().
-void DrawVirtualObject(const char* object_name)
-{
-    // "Ligamos" o VAO. Informamos que queremos utilizar os atributos de
-    // vértices apontados pelo VAO criado pela função BuildTrianglesAndAddToVirtualScene(). Veja
-    // comentários detalhados dentro da definição de BuildTrianglesAndAddToVirtualScene().
-    glBindVertexArray(g_VirtualScene[object_name].vertex_array_object_id);
-
-    // Pedimos para a GPU rasterizar os vértices dos eixos XYZ
-    // apontados pelo VAO como linhas. Veja a definição de
-    // g_VirtualScene[""] dentro da função BuildTrianglesAndAddToVirtualScene(), e veja
-    // a documentação da função glDrawElements() em
-    // http://docs.gl/gl3/glDrawElements.
-    glDrawElements(
-        g_VirtualScene[object_name].rendering_mode,
-        g_VirtualScene[object_name].num_indices,
-        GL_UNSIGNED_INT,
-        (void*)(g_VirtualScene[object_name].first_index * sizeof(GLuint))
-    );
-
-    // "Desligamos" o VAO, evitando assim que operações posteriores venham a
-    // alterar o mesmo. Isso evita bugs.
-    glBindVertexArray(0);
 }
 
 // Função que carrega os shaders de vértices e de fragmentos que serão
@@ -492,6 +393,7 @@ void LoadShadersFromFiles()
     view_uniform            = glGetUniformLocation(program_id, "view"); // Variável da matriz "view" em shader_vertex.glsl
     projection_uniform      = glGetUniformLocation(program_id, "projection"); // Variável da matriz "projection" em shader_vertex.glsl
     object_id_uniform       = glGetUniformLocation(program_id, "object_id"); // Variável "object_id" em shader_fragment.glsl
+    spectral_values_uniform       = glGetUniformLocation(program_id, "spectral_values"); // Variável "spectral_values" em shader_fragment.glsl
 }
 
 // Função que pega a matriz M e guarda a mesma no topo da pilha

@@ -1,0 +1,94 @@
+#ifndef SCENE_H
+#define SCENE_H
+
+#include "Dyn_Object.h"
+#include <iostream>
+#include <experimental/filesystem>
+#include <string>
+#include <vector>
+
+namespace fs = std::experimental::filesystem;
+
+std::vector<Object *> Objects;
+
+class Scene
+{
+    public:
+        Scene();
+        ~Scene();
+
+        void static renderInit();
+        void static renderBaseline();
+        void static loadModels();
+        void static loadModels(std::vector<std::string> paths);
+        void static clearObjects();
+
+    protected:
+
+    private:
+};
+void Scene::renderInit()
+{
+    // Carregamos os shaders de vértices e de fragmentos que serão utilizados
+    // para renderização. Veja slides 180-200 do documento Aula_03_Rendering_Pipeline_Grafico.pdf.
+    //
+    LoadShadersFromFiles();
+
+    // Inicializamos o código para renderização de texto.
+    TextRendering_Init();
+
+    // Habilitamos o Z-buffer. Veja slides 104-116 do documento Aula_09_Projecoes.pdf.
+    glEnable(GL_DEPTH_TEST);
+
+    // Habilitamos o Backface Culling. Veja slides 23-34 do documento Aula_13_Clipping_and_Culling.pdf.
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
+}
+void Scene::renderBaseline()
+{
+    // Definimos a cor do "fundo" do framebuffer como branco.  Tal cor é
+    // definida como coeficientes RGBA: Red, Green, Blue, Alpha; isto é:
+    // Vermelho, Verde, Azul, Alpha (valor de transparência).
+    // Conversaremos sobre sistemas de cores nas aulas de Modelos de Iluminação.
+    //
+    //           R     G     B     A
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+
+    // "Pintamos" todos os pixels do framebuffer com a cor definida acima,
+    // e também resetamos todos os pixels do Z-buffer (depth buffer).
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // Pedimos para a GPU utilizar o programa de GPU criado acima (contendo
+    // os shaders de vértice e fragmentos).
+    glUseProgram(program_id);
+}
+
+void Scene::loadModels()
+{
+    std::string path = "../../data";
+    for (const auto & entry : fs::directory_iterator(path.c_str()))
+    {
+        ObjModel spheremodel(entry.path().string().c_str());
+        ComputeNormals(&spheremodel);
+        BuildTrianglesAndAddToVirtualScene(&spheremodel);
+    }
+}
+void Scene::loadModels(std::vector<std::string> paths)
+{
+    for(const auto & path : paths)
+    {
+        ObjModel spheremodel(path.c_str());
+        ComputeNormals(&spheremodel);
+        BuildTrianglesAndAddToVirtualScene(&spheremodel);
+    }
+}
+
+void Scene::clearObjects()
+{
+    for (Object * x : Objects) {
+        delete x;
+    }
+}
+
+#endif // SCENE_H

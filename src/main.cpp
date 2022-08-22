@@ -15,7 +15,7 @@
 //  vira
 //    #include <cstdio> // Em C++
 //
-#include "Scene.h"
+#include "Enemy.h"
 
 // Declaração de funções utilizadas para pilha de matrizes de modelagem.
 void PushMatrix(glm::mat4 M);
@@ -85,7 +85,7 @@ int main(int argc, char* argv[])
 
     // Criamos uma janela do sistema operacional, com 800 colunas e 600 linhas
     // de pixels, e com título "INF01047 ...".
-    window = glfwCreateWindow(800, 600, "INF01047 - 00326113 - Arthur Brackmann Pires", NULL, NULL);
+    window = glfwCreateWindow(800, 600, "CGame", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -129,6 +129,12 @@ int main(int argc, char* argv[])
 
     Dyn_Object sphere("sphere");
     sphere.pos.x = -1.0;
+
+    Object plane("plane",vec4(0.0,-1.0,0.0,1.0),vec3(0.0,0.0,0.0),vec3(20.0,1.0,20.0),vec3(0.2,0.7,0.15),vec3(0.1,0.1,0.1),vec3(0.0,0.0,0.0),20.0);
+
+    Enemy enemy("bunny",vec3(0.8,0.4,0.4),vec3(0.8,0.8,0.8),vec3(0.8,0.2,0.2),32.0,100,0.00008,0.0025);
+    Scene::player->pos.x = 6.0;
+
     // Ficamos em loop, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
     {
@@ -136,19 +142,29 @@ int main(int argc, char* argv[])
         Scene::renderBaseline();
 
         Camera camera(vec4(0.0,0.0,0.0,1.0));
+        camera.lookat = &Scene::player->pos;
         camera.draw();
 
         //Following example demonstrates all 3 constructors of Object
-        Object plane("plane",vec4(0.0,-1.0,0.0,1.0),vec3(0.0,0.0,0.0),vec3(2.0,1.0,2.0),vec3(0.2,0.2,0.2),vec3(0.3,0.3,0.3),vec3(0.0,0.0,0.0),20.0);
         plane.draw();
 
         sphere.acceleration = 0.00001f * normalize(vec4(0.0,0.0,-1.0,0.0));
         sphere.move();
         sphere.draw();
 
-        Object bunny("bunny",vec3(0.08,0.4,0.8),vec3(0.8,0.8,0.8),vec3(0.04,0.2,0.4),32.0);
-        bunny.pos.x = 1.0;
-        bunny.draw();
+        enemy.pathfinding();
+        enemy.move();
+        enemy.draw();
+
+        vec4 distVec = Scene::player->pos - enemy.pos;
+
+        if(norm(distVec) < 1.0)
+        {
+            enemy.velocity += (0.025f * normalize(-distVec));
+        }
+
+        Scene::player->userMove();
+        Scene::player->draw();
 
         Scene::renderOther();
     }
@@ -421,6 +437,11 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
         fprintf(stdout,"Shaders recarregados!\n");
         fflush(stdout);
     }
+
+    g_WPressed = glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS;
+    g_SPressed = glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS;
+    g_APressed = glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS;
+    g_DPressed = glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS;
 }
 
 // Definimos o callback para impressão de erros da GLFW no terminal

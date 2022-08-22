@@ -2,6 +2,7 @@
 #define SCENE_H
 
 #include "Camera.h"
+#include "Player.h"
 #include <iostream>
 #include <experimental/filesystem>
 #include <string>
@@ -9,14 +10,18 @@
 
 namespace fs = std::experimental::filesystem;
 
+class Enemy;
+
 std::vector<Object *> Objects;
+std::vector<Enemy *> Enemies;
+
 
 class Scene
 {
     public:
         Scene();
         ~Scene();
-
+        static Player * player;
         void static renderInit();
         void static renderBaseline();
         void static renderOther();
@@ -28,6 +33,8 @@ class Scene
 
     private:
 };
+Player * Scene::player = new Player("bunny",vec3(0.08,0.4,0.8),vec3(0.8,0.8,0.8),vec3(0.04,0.2,0.4),32.0,100,0.0025);
+
 void Scene::renderInit()
 {
     // Carregamos os shaders de vértices e de fragmentos que serão utilizados

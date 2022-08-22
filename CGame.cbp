@@ -104,9 +104,6 @@
 			<Add option="lib\libglfw3.a -lgdi32 -lopengl32 -lstdc++fs" />
 			<Add directory="lib" />
 		</Linker>
-		<Unit filename="include/Camera.c">
-			<Option compilerVar="CC" />
-		</Unit>
 		<Unit filename="include/Camera.h" />
 		<Unit filename="include/Dyn_Object.h" />
 		<Unit filename="include/GLFW/glfw3.h" />

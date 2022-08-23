@@ -43,7 +43,7 @@ void Camera::draw()
     else if(type == ISOMETRIC)
     {
         x = lookat->x;
-        y = lookat->y + 10.0;
+        y = lookat->y + 15.0;
         z = lookat->z + 3.0;
     }
 

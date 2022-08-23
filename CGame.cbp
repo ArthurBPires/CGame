@@ -106,10 +106,12 @@
 		</Linker>
 		<Unit filename="include/Camera.h" />
 		<Unit filename="include/Dyn_Object.h" />
+		<Unit filename="include/Enemy.h" />
 		<Unit filename="include/GLFW/glfw3.h" />
 		<Unit filename="include/GLFW/glfw3native.h" />
 		<Unit filename="include/KHR/khrplatform.h" />
 		<Unit filename="include/Object.h" />
+		<Unit filename="include/Player.h" />
 		<Unit filename="include/Scene.h" />
 		<Unit filename="include/dejavufont.h" />
 		<Unit filename="include/glad/glad.h" />

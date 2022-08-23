@@ -8,6 +8,8 @@ using namespace glm;
 class Object
 {
     public:
+        bool contact = false;
+
         std::string model;
         glm::vec4 pos = vec4(0.0f,0.0f,0.0f,1.0f);
         glm::vec3 rot = vec3(0.0f,0.0f,0.0f);
@@ -27,7 +29,9 @@ class Object
 
         Object(vec4 pos) : pos(pos) {};
 
-        void draw();
+        virtual void draw();
+
+        virtual void move() {};
         virtual ~Object();
 
     protected:

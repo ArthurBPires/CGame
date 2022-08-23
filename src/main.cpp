@@ -15,7 +15,7 @@
 //  vira
 //    #include <cstdio> // Em C++
 //
-#include "Enemy.h"
+#include "../maps/test.h"
 
 // Declaração de funções utilizadas para pilha de matrizes de modelagem.
 void PushMatrix(glm::mat4 M);
@@ -124,50 +124,8 @@ int main(int argc, char* argv[])
 
     printf("GPU: %s, %s, OpenGL %s, GLSL %s\n", vendor, renderer, glversion, glslversion);
 
-    Scene::renderInit(); // Inicilização dos procedimentos de renderização
-    Scene::loadModels(); // Construímos a representação de objetos geométricos através de malhas de triângulos
-
-    Dyn_Object sphere("sphere");
-    sphere.pos.x = -1.0;
-
-    Object plane("plane",vec4(0.0,-1.0,0.0,1.0),vec3(0.0,0.0,0.0),vec3(20.0,1.0,20.0),vec3(0.2,0.7,0.15),vec3(0.1,0.1,0.1),vec3(0.0,0.0,0.0),20.0);
-
-    Enemy enemy("bunny",vec3(0.8,0.4,0.4),vec3(0.8,0.8,0.8),vec3(0.8,0.2,0.2),32.0,100,0.00008,0.0025);
-    Scene::player->pos.x = 6.0;
-
-    // Ficamos em loop, renderizando, até que o usuário feche a janela
-    while (!glfwWindowShouldClose(window))
-    {
-        // Aqui executamos as operações de renderização
-        Scene::renderBaseline();
-
-        Camera camera(vec4(0.0,0.0,0.0,1.0));
-        camera.lookat = &Scene::player->pos;
-        camera.draw();
-
-        //Following example demonstrates all 3 constructors of Object
-        plane.draw();
-
-        sphere.acceleration = 0.00001f * normalize(vec4(0.0,0.0,-1.0,0.0));
-        sphere.move();
-        sphere.draw();
-
-        enemy.pathfinding();
-        enemy.move();
-        enemy.draw();
-
-        vec4 distVec = Scene::player->pos - enemy.pos;
-
-        if(norm(distVec) < 1.0)
-        {
-            enemy.velocity += (0.025f * normalize(-distVec));
-        }
-
-        Scene::player->userMove();
-        Scene::player->draw();
-
-        Scene::renderOther();
-    }
+    Scene scene = Scene();
+    scene.test();
 
     // Finalizamos o uso dos recursos do sistema operacional
     glfwTerminate();

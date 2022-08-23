@@ -12,28 +12,54 @@ namespace fs = std::experimental::filesystem;
 
 class Enemy;
 
-std::vector<Object *> Objects;
-std::vector<Enemy *> Enemies;
+struct Configuration
+{
+    float playerHPMod = 1.0;
+    float playerSpeedMod = 1.0;
 
+    float enemyHPMod = 1.0;
+    float enemySpeedMod = 1.0;
+    float enemyMaxSpeedMod = 1.0;
+
+
+    Configuration(float playerHPMod = 1.0,float playerSpeedMod = 1.0,float enemyHPMod = 1.0,float enemySpeedMod = 1.0,float enemyMaxSpeedMod = 1.0):
+        playerHPMod(playerHPMod),playerSpeedMod(playerSpeedMod),enemyHPMod(enemyHPMod),enemySpeedMod(enemySpeedMod),enemyMaxSpeedMod(enemyMaxSpeedMod){};
+};
 
 class Scene
 {
     public:
         Scene();
         ~Scene();
+        static Camera * camera;
         static Player * player;
+        static std::vector<Enemy *> enemies;
+        static std::vector<Object *> objects;
+
+        static Configuration config;
+
+        void test();
+        void level1();
+        void level2();
+
+    protected:
+
+    private:
         void static renderInit();
         void static renderBaseline();
         void static renderOther();
         void static loadModels();
         void static loadModels(std::vector<std::string> paths);
         void static clearObjects();
-
-    protected:
-
-    private:
 };
-Player * Scene::player = new Player("bunny",vec3(0.08,0.4,0.8),vec3(0.8,0.8,0.8),vec3(0.04,0.2,0.4),32.0,100,0.0025);
+Configuration Scene::config(1.0);
+Camera * Scene::camera = NULL;
+Player * Scene::player = NULL;
+std::vector<Enemy *> Scene::enemies;
+std::vector<Object *> Scene::objects;
+
+Scene::Scene() {srand (static_cast <unsigned> (time(0)));};
+Scene::~Scene() {};
 
 void Scene::renderInit()
 {
@@ -122,7 +148,7 @@ void Scene::loadModels(std::vector<std::string> paths)
 
 void Scene::clearObjects()
 {
-    for (Object * x : Objects) {
+    for (Object * x : objects) {
         delete x;
     }
 }

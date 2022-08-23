@@ -23,6 +23,8 @@ class Player : public Dyn_Object
 
         Player(std::string model, vec4 velocity, vec4 acceleration) : Dyn_Object(model,velocity,acceleration) {};
 
+        Player();
+
         void userMove();
 
         ~Player();

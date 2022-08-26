@@ -74,7 +74,12 @@ void cameraZoomIn()
     Scene::camera->type=FREE;
     Scene::camera->inAnimation = false;
 }
-
+void cameraZoomOutAux(std::vector<vec4> points)
+{
+    bezierCurve(2000,100,points,&(Scene::camera->pos));
+    Scene::camera->type=ISOMETRIC;
+    Scene::camera->inAnimation = false;
+}
 void cameraZoomOut()
 {
     /*
@@ -102,6 +107,7 @@ void cameraZoomOut()
 
     Scene::camera->inAnimation = true;
     std::vector<vec4> points;
+    printf("%f %f %f %f\n", Scene::player->pos.x,Scene::player->pos.y,Scene::player->pos.z,Scene::player->pos.w);
     points.push_back(Scene::player->pos);
     points.push_back(vec4(0.0,1.0,0.0,1.0));
     points.push_back(vec4(0.0,2.0,0.0,1.0));
@@ -223,7 +229,14 @@ void Scene::keyEventHandler()
             }
             else if(camera->type == FREE)
             {
-                std::thread(cameraZoomOut).detach();
+                Scene::camera->inAnimation = true;
+                std::vector<vec4> points;
+                printf("%f %f %f %f\n", Scene::player->pos.x,Scene::player->pos.y,Scene::player->pos.z,Scene::player->pos.w);
+                points.push_back(Scene::player->pos);
+                points.push_back(vec4(0.0,1.0,0.0,1.0));
+                points.push_back(vec4(0.0,2.0,0.0,1.0));
+                points.push_back(vec4(1.0,15.0,1.0,1.0));
+                std::thread(cameraZoomOutAux,points).detach();
             }
             g_CPressed = false;
         }

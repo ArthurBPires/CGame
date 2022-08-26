@@ -80,12 +80,14 @@ void cameraZoomOut()
     /*
     Scene::camera->type=ISOMETRIC;
     Scene::camera->inAnimation = true;
-    std::vector<vec4> points2;
+    std::vector<vec4> points;
 
     points.push_back(Scene::camera->pos);
     points.push_back(vec4(Scene::camera->pos.x,0.0,Scene::camera->pos.z + 3.0,1.0));
     points.push_back(glm::vec4(Scene::camera->lookat->x,0.0,(Scene::camera->lookat->z + 3.0),1.0));//(Scene::camera->pos.y - 7.5)
     points.push_back(glm::vec4(Scene::camera->lookat->x,Scene::camera->lookat->y + 15.0,Scene::camera->lookat->z + 3.0,1.0));
+    bezierCurve(2000,100,points,&(Scene::camera->pos));
+    Scene::camera->inAnimation = false;
     */
     /*
     points2.push_back(vec4(0.0,0.0,0.0,1.0));
@@ -97,12 +99,13 @@ void cameraZoomOut()
     bezierCurve(2000,100,points2,&(Scene::camera->pos));
     Scene::camera->inAnimation = false;
     */
+
     Scene::camera->inAnimation = true;
     std::vector<vec4> points;
-    points.push_back(vec4(0.0,0.0,0.0,1.0));
+    points.push_back(Scene::player->pos);
     points.push_back(vec4(0.0,1.0,0.0,1.0));
     points.push_back(vec4(0.0,2.0,0.0,1.0));
-    points.push_back(vec4(1.0,1.0,1.0,1.0));
+    points.push_back(vec4(1.0,15.0,1.0,1.0));
     bezierCurve(2000,100,points,&(Scene::camera->pos));
     Scene::camera->type=ISOMETRIC;
     Scene::camera->inAnimation = false;

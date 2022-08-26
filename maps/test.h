@@ -25,6 +25,18 @@ void dynamic()
         {
             enemy->velocity = (0.15f * normalize(-distVec));
         }
+
+        for(auto & enemy2 : Scene::enemies)
+        {
+            if(enemy != enemy2)
+            {
+                vec4 distEnem = enemy2->pos - enemy->pos;
+                if(norm(distEnem) < 1.0)
+                {
+                    enemy->pos += (0.05f * normalize(-distEnem));
+                }
+            }
+        }
     }
 
     //Scene::player->userMove();

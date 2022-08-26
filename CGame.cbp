@@ -113,6 +113,7 @@
 		<Unit filename="include/Object.h" />
 		<Unit filename="include/Player.h" />
 		<Unit filename="include/Scene.h" />
+		<Unit filename="include/Timer.h" />
 		<Unit filename="include/dejavufont.h" />
 		<Unit filename="include/glad/glad.h" />
 		<Unit filename="include/glm/CMakeLists.txt" />
@@ -381,6 +382,7 @@
 		<Unit filename="include/matrices.h" />
 		<Unit filename="include/tiny_obj_loader.h" />
 		<Unit filename="include/utils.h" />
+		<Unit filename="maps/test.h" />
 		<Unit filename="src/glad.c">
 			<Option compilerVar="CC" />
 		</Unit>

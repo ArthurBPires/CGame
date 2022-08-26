@@ -4,6 +4,7 @@
 #include "Dyn_Object.h"
 
 bool g_WPressed = false,g_SPressed = false,g_APressed = false,g_DPressed = false;
+bool g_CPressed = false;
 
 class Player : public Dyn_Object
 {
@@ -38,19 +39,19 @@ void Player::userMove()
 {
     if (g_WPressed)
     {
-        pos.z -= speed*1.0;
+        pos.z -= speed;
     }
     if (g_SPressed)
     {
-        pos.z += speed*1.0;
+        pos.z += speed;
     }
     if (g_APressed)
     {
-        pos.x -= speed*1.0;
+        pos.x -= speed;
     }
     if (g_DPressed)
     {
-        pos.x += speed*1.0;
+        pos.x += speed;
     }
 }
 

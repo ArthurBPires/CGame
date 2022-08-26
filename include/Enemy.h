@@ -41,7 +41,7 @@ void Enemy::spawn(int dist = 15.0)
     //value between -pi and +pi
     float delta = (-M_PI) + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(M_PI-(-M_PI))));
 
-    Enemy * newEnemy = new Enemy("bunny",vec3(0.8,0.4,0.4),vec3(0.8,0.8,0.8),vec3(0.8,0.2,0.2),32.0,100,0.00008,0.0025);
+    Enemy * newEnemy = new Enemy("bunny",vec3(0.8,0.4,0.4),vec3(0.8,0.8,0.8),vec3(0.8,0.2,0.2),32.0,100,0.0025,0.025);
     newEnemy->pos.x = Scene::player->pos.x + (dist * cos(delta));
     newEnemy->pos.z = Scene::player->pos.z + (dist * sin(delta));
 

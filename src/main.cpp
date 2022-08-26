@@ -395,11 +395,14 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
         fprintf(stdout,"Shaders recarregados!\n");
         fflush(stdout);
     }
+    g_CPressed = glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS;
 
     g_WPressed = glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS;
     g_SPressed = glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS;
     g_APressed = glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS;
     g_DPressed = glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS;
+    //Scene::player->userMove();
+    //Scene::camera->move();
 }
 
 // Definimos o callback para impressão de erros da GLFW no terminal

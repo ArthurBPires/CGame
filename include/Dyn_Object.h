@@ -3,12 +3,21 @@
 #define DYN_OBJECT_H
 
 #include "Object.h"
+#include <chrono>
+
+typedef std::chrono::high_resolution_clock Clock;
+
+using std::chrono::milliseconds;
+using std::chrono::duration_cast;
+using std::chrono::duration;
 
 class Dyn_Object : public Object
 {
     public:
         vec4 velocity = vec4(0.0,0.0,0.0,0.0);
         vec4 acceleration = vec4(0.0,0.0,0.0,0.0);
+
+        Clock::time_point timer = Clock::now();
 
         Dyn_Object(std::string model,vec4 pos, vec3 rot, vec3 scl, vec3 Kd, vec3 Ks, vec3 Ka, float q) :
             Object(model,pos,rot,scl,Kd,Ks,Ka,q) {};
@@ -33,8 +42,13 @@ class Dyn_Object : public Object
 //When implemented, should be divided by TIME_STEP
 void Dyn_Object::move()
 {
-    this->pos = this->pos + this->velocity;
-    this->velocity = this->velocity + this->acceleration;
+    //auto newTime = Clock::now();
+    //duration<float, std::milli> diff = newTime - timer;
+    //float t = diff.count()/1000.0f;
+    float t = 1.0/60.0f;
+    this->pos += this->velocity * t;
+    this->velocity += this->acceleration * t;
+    //timer = newTime;
 }
 
 Dyn_Object::~Dyn_Object()

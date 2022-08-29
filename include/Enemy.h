@@ -11,8 +11,8 @@ class Enemy : public Dyn_Object
 {
     public:
         int hp = 100;
-        float speed = 0.00025;
-        float maxSpeed = 0.25;
+        float speed = 1.5;
+        float maxSpeed = 1.0;
 
         Enemy(std::string model,vec4 pos, vec3 rot, vec3 scl, vec3 Kd, vec3 Ks, vec3 Ka, float q, int hp, float speed=0.00025, float maxSpeed=0.0025) :
             Dyn_Object(model,pos,rot,scl,Kd,Ks,Ka,q), hp(hp), speed(speed), maxSpeed(maxSpeed) {};
@@ -41,7 +41,7 @@ void Enemy::spawn(int dist = 15.0)
     //value between -pi and +pi
     float delta = (-M_PI) + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(M_PI-(-M_PI))));
 
-    Enemy * newEnemy = new Enemy("bunny",vec3(0.8,0.4,0.4),vec3(0.8,0.8,0.8),vec3(0.8,0.2,0.2),32.0,100,0.0025,0.025);
+    Enemy * newEnemy = new Enemy("bunny",vec3(0.8,0.4,0.4),vec3(0.8,0.8,0.8),vec3(0.8,0.2,0.2),32.0,100,1.5,1.0);
     newEnemy->pos.x = Scene::player->pos.x + (dist * cos(delta));
     newEnemy->pos.z = Scene::player->pos.z + (dist * sin(delta));
 
@@ -68,7 +68,8 @@ void Enemy::pathfinding()
         {
             z = dir.z * this->speed;
         }
-        this->velocity += vec4(x,y,z,0.0);
+        float t = Scene::config.timeStep;
+        this->velocity += vec4(x,y,z,0.0)*t;
     }
 }
 

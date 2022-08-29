@@ -5,51 +5,14 @@
 #include <ostream>
 #include <chrono>
 #include <thread>
-
-void bezierCurve(int duration, int frames, std::vector<vec4> points, vec4 * position)
-{
-    int delay = std::round(duration / frames);
-
-    float step = (float)(1.0f / frames);
-
-    for(float t = 0.0f; t < 1.0f - 0.0001; t += step)
-    {
-        std::vector<vec4> pointsAux = points;
-        do
-        {
-            int degree = pointsAux.size() - 1;
-            for(int i = 0; i < degree; i++)
-            {
-                vec4 a = pointsAux.front();
-                pointsAux.erase(pointsAux.begin());
-                vec4 b = pointsAux.front();
-                vec4 c = a + t * (b - a);
-                pointsAux.push_back(c);
-            }
-            pointsAux.erase(pointsAux.begin());
-
-            //printf("size after: %d\n", points.size());
-            /*
-            if(points.size() > 1)
-                points.erase(points.begin(),points.begin() + degree + 1);*/
-        } while(pointsAux.size() > 1);
-
-        vec4 pointF = pointsAux.front();
-        //printf("%f %f %f %f\n", pointF.x,pointF.y,pointF.z,pointF.w);
-        position->x = pointF.x;
-        position->y = pointF.y;
-        position->z = pointF.z;
-        //printf("after\n");
-        std::this_thread::sleep_for(std::chrono::milliseconds(delay));
-    }
-    //printf("end\n");
-}
+#include <mutex>
 
 enum CameraType {LOOKAT,ISOMETRIC,FREE};
 
 class Camera : public Dyn_Object
 {
     public:
+        std::mutex m;
         CameraType type = ISOMETRIC;
         float r = 3.5f;
         float nearplane = -1.0f;
@@ -84,8 +47,11 @@ void Camera::draw()
 
     // Computamos a matriz "View" utilizando os parâmetros da câmera para
     // definir o sistema de coordenadas da câmera.  Veja slides 2-14, 184-190 e 236-242 do documento Aula_08_Sistemas_de_Coordenadas.pdf.
+    //m.lock();
+    vec4 cameraPos = pos;
 
-    view = Matrix_Camera_View(pos, view_vector, up_vector);
+    view = Matrix_Camera_View(cameraPos, view_vector, up_vector);
+    //m.unlock();
 
     if (g_UsePerspectiveProjection)
     {

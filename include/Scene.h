@@ -18,6 +18,8 @@ struct Configuration
     float enemyHPMod = 1.0;
     float enemySpeedMod = 1.0;
     float enemyMaxSpeedMod = 1.0;
+    double limitFPS = 1.0 / 60.0;
+    float timeStep = limitFPS;
 
 
     Configuration(float playerHPMod = 1.0,float playerSpeedMod = 1.0,float enemyHPMod = 1.0,float enemySpeedMod = 1.0,float enemyMaxSpeedMod = 1.0):
@@ -62,58 +64,58 @@ std::vector<Object *> Scene::objects;
 Scene::Scene() {srand (static_cast <unsigned> (time(0)));};
 Scene::~Scene() {};
 
+void bezierCurve(int duration, int frames, std::vector<vec4> points, vec4 * position)
+{
+    int delay = std::round(duration / frames);
+
+    float step = (float)(1.0f / frames);
+
+    for(float t = 0.0f; t < 1.0f; t += step)
+    {
+        std::vector<vec4> pointsAux = points;
+        do
+        {
+            int degree = pointsAux.size() - 1;
+            for(int i = 0; i < degree; i++)
+            {
+                vec4 a = pointsAux.front();
+                pointsAux.erase(pointsAux.begin());
+                vec4 b = pointsAux.front();
+                vec4 c = a + t * (b - a);
+                pointsAux.push_back(c);
+            }
+            pointsAux.erase(pointsAux.begin());
+        } while(pointsAux.size() > 1);
+
+        *position = pointsAux.front();
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(delay));
+    }
+}
+
 void cameraZoomIn()
 {
     Scene::camera->inAnimation = true;
-    std::vector<vec4> points;
+    std::vector<vec4> points = std::vector<vec4>();
     points.push_back(Scene::camera->pos);
-    points.push_back(glm::vec4(Scene::camera->pos.x,0.0,(Scene::camera->pos.z + 3.0),1.0));//(Scene::camera->pos.y - 7.5)
+    points.push_back(glm::vec4(Scene::camera->pos.x,0.0,(Scene::camera->pos.z + 3.0),1.0));
     points.push_back(vec4(Scene::player->pos.x,0.0,Scene::player->pos.z,1.0));
     points.push_back(Scene::player->pos);
-    bezierCurve(2000,100,points,&(Scene::camera->pos));
+    bezierCurve(500,100,points,&(Scene::camera->pos));
     Scene::camera->type=FREE;
-    Scene::camera->inAnimation = false;
-}
-void cameraZoomOutAux(std::vector<vec4> points)
-{
-    bezierCurve(2000,100,points,&(Scene::camera->pos));
-    Scene::camera->type=ISOMETRIC;
     Scene::camera->inAnimation = false;
 }
 void cameraZoomOut()
 {
-    /*
     Scene::camera->type=ISOMETRIC;
     Scene::camera->inAnimation = true;
     std::vector<vec4> points;
 
     points.push_back(Scene::camera->pos);
     points.push_back(vec4(Scene::camera->pos.x,0.0,Scene::camera->pos.z + 3.0,1.0));
-    points.push_back(glm::vec4(Scene::camera->lookat->x,0.0,(Scene::camera->lookat->z + 3.0),1.0));//(Scene::camera->pos.y - 7.5)
+    points.push_back(glm::vec4(Scene::camera->lookat->x,0.0,(Scene::camera->lookat->z + 3.0),1.0));
     points.push_back(glm::vec4(Scene::camera->lookat->x,Scene::camera->lookat->y + 15.0,Scene::camera->lookat->z + 3.0,1.0));
-    bezierCurve(2000,100,points,&(Scene::camera->pos));
-    Scene::camera->inAnimation = false;
-    */
-    /*
-    points2.push_back(vec4(0.0,0.0,0.0,1.0));
-    points2.push_back(vec4(0.0,1.0,0.0,1.0));
-    points2.push_back(vec4(0.0,2.0,0.0,1.0));
-    points2.push_back(vec4(1.0,1.0,1.0,1.0));
-
-    printf("right before\n");
-    bezierCurve(2000,100,points2,&(Scene::camera->pos));
-    Scene::camera->inAnimation = false;
-    */
-
-    Scene::camera->inAnimation = true;
-    std::vector<vec4> points;
-    printf("%f %f %f %f\n", Scene::player->pos.x,Scene::player->pos.y,Scene::player->pos.z,Scene::player->pos.w);
-    points.push_back(Scene::player->pos);
-    points.push_back(vec4(0.0,1.0,0.0,1.0));
-    points.push_back(vec4(0.0,2.0,0.0,1.0));
-    points.push_back(vec4(1.0,15.0,1.0,1.0));
-    bezierCurve(2000,100,points,&(Scene::camera->pos));
-    Scene::camera->type=ISOMETRIC;
+    bezierCurve(500,100,points,&(Scene::camera->pos));
     Scene::camera->inAnimation = false;
 }
 
@@ -121,8 +123,14 @@ void Scene::keyEventHandler()
 {
     if(!camera->inAnimation)
     {
+        //auto newTime = Clock::now();
+        //duration<float, std::milli> diff = newTime - player->timer;
+        //float t = diff.count()/1000.0f;
+        float t = config.timeStep;
+
         if (g_WPressed)
         {
+
             if(camera->type == FREE)
             {
                 glm::vec4 w = camera->view_vector;
@@ -130,10 +138,10 @@ void Scene::keyEventHandler()
 
                 w = normalize(w);
 
-                player->pos += w*player->speed;
+                player->pos += w*player->speed*t;
             }
             else
-                player->pos.z -= player->speed;
+                player->pos.z -= player->speed*t;
         }
         if (g_SPressed)
         {
@@ -144,10 +152,10 @@ void Scene::keyEventHandler()
 
                 w = normalize(w);
 
-                player->pos -= w*player->speed;
+                player->pos -= w*player->speed*t;
             }
             else
-                player->pos.z += player->speed;
+                player->pos.z += player->speed*t;
         }
         if (g_APressed)
         {
@@ -159,10 +167,10 @@ void Scene::keyEventHandler()
 
                 glm::vec4 u = crossproduct(camera->up_vector,w);
 
-                player->pos += u*player->speed;
+                player->pos += u*player->speed*t;
             }
             else
-                player->pos.x -= player->speed;
+                player->pos.x -= player->speed*t;
         }
         if (g_DPressed)
         {
@@ -174,13 +182,11 @@ void Scene::keyEventHandler()
 
                 glm::vec4 u = crossproduct(camera->up_vector,w);
 
-                player->pos -= u*player->speed;
+                player->pos -= u*player->speed*t;
             }
             else
-                player->pos.x += player->speed;
+                player->pos.x += player->speed*t;
         }
-
-
 
         if(camera->type == LOOKAT)
         {
@@ -209,13 +215,6 @@ void Scene::keyEventHandler()
             camera->view_vector.y = -sin(g_CameraPhi);
             camera->view_vector.x = -cos(g_CameraPhi)*sin(g_CameraTheta);
 
-            //glm::vec4 w = normalize(-1.0f * camera->view_vector);
-            /*
-            glm::vec4 w = normalize(-1.0f * camera->view_vector);
-            w.y = Scene::player->pos.y;
-            glm::vec4 u = normalize(crossproduct(camera->up_vector,w));
-            */
-
             camera->pos.x = player->pos.x;
             camera->pos.y = player->pos.y;
             camera->pos.z = player->pos.z;
@@ -226,28 +225,27 @@ void Scene::keyEventHandler()
             if(camera->type == ISOMETRIC)
             {
                 std::thread(cameraZoomIn).detach();
+                g_CameraPhi = 0.0f;
+                g_CameraTheta = 0.0f;
             }
             else if(camera->type == FREE)
             {
-                Scene::camera->inAnimation = true;
-                std::vector<vec4> points;
-                printf("%f %f %f %f\n", Scene::player->pos.x,Scene::player->pos.y,Scene::player->pos.z,Scene::player->pos.w);
-                points.push_back(Scene::player->pos);
-                points.push_back(vec4(0.0,1.0,0.0,1.0));
-                points.push_back(vec4(0.0,2.0,0.0,1.0));
-                points.push_back(vec4(1.0,15.0,1.0,1.0));
-                std::thread(cameraZoomOutAux,points).detach();
+                std::thread(cameraZoomOut).detach();
             }
             g_CPressed = false;
         }
     }
-    else
+    else if(norm(camera->pos - player->pos) > 0.0005) //if camera in animation, look at player. (norm test to solve runtime error when *(camera->lookat) == camera->pos)
+    {
         camera->view_vector = *(camera->lookat) - camera->pos;
-
+    }
+    /*
     if(camera->type != FREE)
         player->draw();
 
+
     camera->draw();
+    */
 }
 
 void Scene::renderInit()

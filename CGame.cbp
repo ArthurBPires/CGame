@@ -97,11 +97,10 @@
 		<Compiler>
 			<Add option="-Wall" />
 			<Add option="-Wno-unused-function" />
-			<Add option="-lstdc++fs" />
 			<Add directory="include" />
 		</Compiler>
 		<Linker>
-			<Add option="lib\libglfw3.a -lgdi32 -lopengl32 -lstdc++fs" />
+			<Add option="lib\libglfw3.a -lgdi32 -lopengl32" />
 			<Add directory="lib" />
 		</Linker>
 		<Unit filename="include/Camera.h" />

@@ -9,69 +9,58 @@
 
 void dynamic()
 {
-    if(glfwWindowShouldClose(window))
-        exit(0);
-    for(auto & object : Scene::objects)
-    {
-        object->move();
-    }
-    for(auto & enemy : Scene::enemies)
-    {
-        enemy->pathfinding();
+    double nowTime = 0, deltaTime = 0, lastTime = glfwGetTime();
 
-        //In here, we give a repulsion to enemies close to player;
-        vec4 distVec = Scene::player->pos - enemy->pos;
-        if(norm(distVec) < 1.2)
-        {
-            enemy->velocity = (0.15f * normalize(-distVec));
-        }
+    while(!glfwWindowShouldClose(window))
+    {
+        nowTime = glfwGetTime();
+        deltaTime += (nowTime - lastTime) / Scene::config.limitFPS;
+        lastTime = nowTime;
 
-        for(auto & enemy2 : Scene::enemies)
+        while(deltaTime >= 1.0)
         {
-            if(enemy != enemy2)
+            for(auto & object : Scene::objects)
             {
-                vec4 distEnem = enemy2->pos - enemy->pos;
-                if(norm(distEnem) < 1.0)
+                object->move();
+            }
+            for(auto & enemy : Scene::enemies)
+            {
+                enemy->pathfinding();
+
+                //In here, we give a repulsion to enemies close to player
+                vec4 distVec = Scene::player->pos - enemy->pos;
+                if(norm(distVec) < 1.25)
                 {
-                    enemy->pos += (0.05f * normalize(-distEnem));
+                    enemy->velocity = (4.0f * normalize(-distVec));
+                }
+                //In here, we give collision to enemies
+                for(auto & enemy2 : Scene::enemies)
+                {
+                    if(enemy != enemy2)
+                    {
+                        vec4 distEnem = enemy2->pos - enemy->pos;
+                        if(norm(distEnem) < 1.0)
+                        {
+                            enemy->pos += (0.05f * normalize(-distEnem));
+                        }
+                    }
                 }
             }
-        }
-    }
 
-    //Scene::player->userMove();
-    Timer t1{10,dynamic};
-}
-/*
-void cameraThread()
-{
-    Scene::camera->inAnimation = true;
-    std::vector<vec4> points;
-    points.push_back(Scene::camera->pos);
-    points.push_back(glm::vec4(Scene::camera->pos.x,0.0,(Scene::camera->pos.z + 3.0),1.0));//(Scene::camera->pos.y - 7.5)
-    points.push_back(vec4(Scene::player->pos.x,0.0,Scene::player->pos.z,1.0));
-    points.push_back(Scene::player->pos);
-    bezierCurve(2000,100,points,&(Scene::camera->pos));
-    Scene::camera->type=FREE;
-    Scene::camera->inAnimation = false;
-}
-*/
-void playerMov()
-{
-    //Moves player based on user input
-    if(glfwWindowShouldClose(window))
-        exit(0);
-    Scene::player->userMove();
-    Scene::camera->move();
-    Timer t2{10,playerMov};
+            deltaTime--;
+        }
+        //std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
 }
 
 void Scene::test()
 {
+    double nowTime = 0, deltaTime = 0, lastTime = glfwGetTime();
+
     Scene::renderInit(); // Inicilização dos procedimentos de renderização
     Scene::loadModels(); // Construímos a representação de objetos geométricos através de malhas de triângulos
 
-    float speed = 0.025;
+    float speed = 4.0;
     player = new Player("bunny",vec3(0.08,0.4,0.8),vec3(0.8,0.8,0.8),vec3(0.04,0.2,0.4),32.0,100,speed);
     Scene::player->pos.x = 6.0;
 
@@ -86,14 +75,15 @@ void Scene::test()
     Dyn_Object sphere("sphere");
     sphere.pos.x = -1.0;
     //Gives it acceleration;
-     sphere.acceleration = 0.0001f * normalize(vec4(0.0,0.0,-1.0,0.0));
+    sphere.acceleration = 0.0001f * normalize(vec4(0.0,0.0,-1.0,0.0));
     Scene::objects.push_back(&sphere);
 
     Scene::objects.push_back(new Object("plane",vec4(0.0,-1.0,0.0,1.0),vec3(0.0,0.0,0.0),vec3(20.0,1.0,20.0),vec3(0.2,0.7,0.15),vec3(0.1,0.1,0.1),vec3(0.0,0.0,0.0),20.0));
 
-    Scene::enemies.push_back(new Enemy("bunny",vec3(0.8,0.4,0.4),vec3(0.8,0.8,0.8),vec3(0.8,0.2,0.2),32.0,100,0.0025,0.025));
+    Scene::enemies.push_back(new Enemy("bunny",vec3(0.8,0.4,0.4),vec3(0.8,0.8,0.8),vec3(0.8,0.2,0.2),32.0,100,1.5,1.0));
     Scene::objects.push_back( Scene::enemies.back());
 
+    Enemy::spawn();
     Enemy::spawn();
     Enemy::spawn();
     Enemy::spawn();
@@ -105,37 +95,38 @@ void Scene::test()
         printf("%f\n", dist);
     }
 
-    Timer t1{10,dynamic};
-    //std::thread thread_obj(playerMov);
-    //Timer t2{100,cameraZoomIn};
-    //Timer t3{8000,cameraZoomIn};
-    //std::vector<vec4> points{vec4(0.0,0.0,0.0,1.0),vec4(4.0,6.0,0.0,1.0),vec4(10.0,6.0,0.0,1.0),vec4(14.0,0.0,0.0,1.0)};
-    //bezierCurve(2000,2,points,&camera->pos);
+    std::thread(dynamic).detach();
 
     // Ficamos em loop, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
     {
+        nowTime = glfwGetTime();
+        deltaTime += (nowTime - lastTime) / Scene::config.limitFPS;
+        lastTime = nowTime;
+
         // Aqui executamos as operações de renderização
         Scene::renderBaseline();
 
 
         for(auto & object : objects)
         {
-            //object->move();
             object->draw();
         }
-        Scene::keyEventHandler();
-        //player->draw();
-        //camera->draw();
-        //Moves player based on user input
-        //player->userMove();
-        //Scene::keyEventHandler();
-        //camera->draw();
+
+        while(deltaTime >= 1.0)
+        {
+            Scene::keyEventHandler();
+            deltaTime--;
+        }
+        player->draw();
+        camera->draw();
 
         Scene::renderOther();
-
-        //Sleep(5);
     }
+
+    Scene::clearObjects();
+    delete player;
+    delete camera;
 }
 
 #endif // TEST_H

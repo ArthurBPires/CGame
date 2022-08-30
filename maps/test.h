@@ -14,7 +14,7 @@ void dynamic()
     while(!glfwWindowShouldClose(window))
     {
         nowTime = glfwGetTime();
-        deltaTime += (nowTime - lastTime) / Scene::config.limitFPS;
+        deltaTime += (nowTime - lastTime) / Scene::config->t;
         lastTime = nowTime;
 
         while(deltaTime >= 1.0)
@@ -29,7 +29,7 @@ void dynamic()
 
                 //In here, we give a repulsion to enemies close to player
                 vec4 distVec = Scene::player->pos - enemy->pos;
-                if(norm(distVec) < 1.25)
+                if(norm(distVec) < 1.2)
                 {
                     enemy->velocity = (4.0f * normalize(-distVec));
                 }
@@ -39,9 +39,9 @@ void dynamic()
                     if(enemy != enemy2)
                     {
                         vec4 distEnem = enemy2->pos - enemy->pos;
-                        if(norm(distEnem) < 1.0)
+                        if(norm(distEnem) < 1.2)
                         {
-                            enemy->pos += (0.05f * normalize(-distEnem));
+                            enemy->pos += (3.0f * normalize(-distEnem) * Scene::config->t);
                         }
                     }
                 }
@@ -68,18 +68,36 @@ void Scene::test()
 
     camera = new Camera(vec4(0.0,0.0,0.0,1.0));
     camera->lookat = &Scene::player->pos;
+    camera->farplane = -50.0f;
 
     //Scene::objects.push_back(camera);
 
     //Adds sphere in pos(-1.0,0.0,0.0);
     Dyn_Object sphere("sphere");
     sphere.pos.x = -1.0;
+
     //Gives it acceleration;
-    sphere.acceleration = 0.0001f * normalize(vec4(0.0,0.0,-1.0,0.0));
+    sphere.acceleration = 0.1f * normalize(vec4(0.0,0.0,-1.0,0.0));
     Scene::objects.push_back(&sphere);
 
-    Scene::objects.push_back(new Object("plane",vec4(0.0,-1.0,0.0,1.0),vec3(0.0,0.0,0.0),vec3(20.0,1.0,20.0),vec3(0.2,0.7,0.15),vec3(0.1,0.1,0.1),vec3(0.0,0.0,0.0),20.0));
+    //Ground
+    Scene::objects.push_back(new Object("plane",vec4(0.0,-1.00,0.0,1.0),vec3(0.0,0.0,0.0),vec3(20.0,1.0,20.0),vec3(0.2,0.7,0.15),vec3(0.1,0.1,0.1),vec3(0.0,0.0,0.0),20.0));
 
+    //Trees
+    Scene::objects.push_back(new Object("tree_cone",vec4(1.0,-1.0,1.0,1.0),vec3(0.0,0.0,0.0),vec3(3.0,3.0,3.0),vec3(0.0,0.5,0.1),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),5.0));
+    Scene::objects.push_back(new Object("tree_cone",vec4(5.0,-1.0,8.0,1.0),vec3(0.0,0.0,0.0),vec3(2.0,2.0,2.0),vec3(0.0,0.5,0.1),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),5.0));
+    Scene::objects.push_back(new Object("tree_cone",vec4(-4.0,-1.0,7.0,1.0),vec3(0.0,0.0,0.0),vec3(3.5,3.5,3.5),vec3(0.0,0.5,0.1),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),5.0));
+    Scene::objects.push_back(new Object("tree_cone",vec4(-3.0,-1.0,-5.0,1.0),vec3(0.0,0.0,0.0),vec3(2.0,2.0,2.0),vec3(0.0,0.5,0.1),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),5.0));
+    Scene::objects.push_back(new Object("tree_cone",vec4(2.0,-1.0,-9.0,1.0),vec3(0.0,0.0,0.0),vec3(4.0,4.0,4.0),vec3(0.0,0.5,0.1),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),5.0));
+    Scene::objects.push_back(new Object("tree_cone",vec4(13.0,-1.0,-8.0,1.0),vec3(0.0,0.0,0.0),vec3(3.5,3.5,3.5),vec3(0.0,0.5,0.1),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),5.0));
+    Scene::objects.push_back(new Object("tree_cone",vec4(16.0,-1.0,-12.0,1.0),vec3(0.0,0.0,0.0),vec3(2.0,2.8,2.0),vec3(0.0,0.5,0.1),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),5.0));
+    Scene::objects.push_back(new Object("tree_cone",vec4(8.0,-1.0,-16.0,1.0),vec3(0.0,0.0,0.0),vec3(2.2,2.2,2.2),vec3(0.0,0.5,0.1),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),5.0));
+
+    //Rocks
+    Scene::objects.push_back(new Object("rock_cube",vec4(0.0,-1.0,0.0,1.0),vec3(0.0,0.0,0.0),vec3(1.0,1.0,1.0),vec3(0.5,0.4,0.3),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),2.0));
+    Scene::objects.push_back(new Object("rock_cube",vec4(4.0,-1.0,-18.0,1.0),vec3(0.0,0.0,0.0),vec3(1.0,2.0,2.4),vec3(0.5,0.4,0.3),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),2.0));
+
+    //Enemies
     Scene::enemies.push_back(new Enemy("bunny",vec3(0.8,0.4,0.4),vec3(0.8,0.8,0.8),vec3(0.8,0.2,0.2),32.0,100,1.5,1.0));
     Scene::objects.push_back( Scene::enemies.back());
 
@@ -101,25 +119,28 @@ void Scene::test()
     while (!glfwWindowShouldClose(window))
     {
         nowTime = glfwGetTime();
-        deltaTime += (nowTime - lastTime) / Scene::config.limitFPS;
+        deltaTime += (nowTime - lastTime) / Scene::config->t;
         lastTime = nowTime;
 
         // Aqui executamos as operações de renderização
         Scene::renderBaseline();
 
+        camera->draw();
+        //player->draw();
+        if(camera->type != FREE)
+            player->draw();
 
-        for(auto & object : objects)
-        {
-            object->draw();
-        }
 
         while(deltaTime >= 1.0)
         {
             Scene::keyEventHandler();
             deltaTime--;
         }
-        player->draw();
-        camera->draw();
+
+        for(auto & object : objects)
+        {
+            object->draw();
+        }
 
         Scene::renderOther();
     }

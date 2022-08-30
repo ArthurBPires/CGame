@@ -10,21 +10,7 @@
 
 class Enemy;
 
-struct Configuration
-{
-    float playerHPMod = 1.0;
-    float playerSpeedMod = 1.0;
 
-    float enemyHPMod = 1.0;
-    float enemySpeedMod = 1.0;
-    float enemyMaxSpeedMod = 1.0;
-    double limitFPS = 1.0 / 60.0;
-    float timeStep = limitFPS;
-
-
-    Configuration(float playerHPMod = 1.0,float playerSpeedMod = 1.0,float enemyHPMod = 1.0,float enemySpeedMod = 1.0,float enemyMaxSpeedMod = 1.0):
-        playerHPMod(playerHPMod),playerSpeedMod(playerSpeedMod),enemyHPMod(enemyHPMod),enemySpeedMod(enemySpeedMod),enemyMaxSpeedMod(enemyMaxSpeedMod){};
-};
 
 class Scene
 {
@@ -36,7 +22,7 @@ class Scene
         static std::vector<Enemy *> enemies;
         static std::vector<Object *> objects;
 
-        static Configuration config;
+        static Configuration * config;
 
         void test();
         void level1();
@@ -55,7 +41,7 @@ class Scene
 
     private:
 };
-Configuration Scene::config(1.0);
+Configuration * Scene::config = &g_config;
 Camera * Scene::camera = NULL;
 Player * Scene::player = NULL;
 std::vector<Enemy *> Scene::enemies;
@@ -123,10 +109,7 @@ void Scene::keyEventHandler()
 {
     if(!camera->inAnimation)
     {
-        //auto newTime = Clock::now();
-        //duration<float, std::milli> diff = newTime - player->timer;
-        //float t = diff.count()/1000.0f;
-        float t = config.timeStep;
+        float t = config->t;
 
         if (g_WPressed)
         {
@@ -188,38 +171,6 @@ void Scene::keyEventHandler()
                 player->pos.x += player->speed*t;
         }
 
-        if(camera->type == LOOKAT)
-        {
-            camera->pos.x = camera->r*cos(g_CameraPhi)*sin(g_CameraTheta);
-            camera->pos.y = camera->r*sin(g_CameraPhi);
-            camera->pos.z = camera->r*cos(g_CameraPhi)*cos(g_CameraTheta);
-
-            // Abaixo definimos as varáveis que efetivamente definem a câmera virtual.
-            // Veja slides 195-227 e 229-234 do documento Aula_08_Sistemas_de_Coordenadas.pdf.
-            camera->view_vector = *(camera->lookat) - camera->pos; // Vetor "view", sentido para onde a câmera está virada
-        }
-        else if(camera->type == ISOMETRIC)
-        {
-            camera->pos.x = camera->lookat->x;
-            camera->pos.y = camera->lookat->y + 15.0;
-            camera->pos.z = camera->lookat->z + 3.0;
-
-            // Abaixo definimos as varáveis que efetivamente definem a câmera virtual.
-            // Veja slides 195-227 e 229-234 do documento Aula_08_Sistemas_de_Coordenadas.pdf.
-            camera->view_vector = *(camera->lookat) - camera->pos; // Vetor "view", sentido para onde a câmera está virada
-        }
-        else if(camera->type == FREE)
-        {
-            // Vetor "view", sentido para onde a câmera está virada
-            camera->view_vector.z = -cos(g_CameraPhi)*cos(g_CameraTheta);
-            camera->view_vector.y = -sin(g_CameraPhi);
-            camera->view_vector.x = -cos(g_CameraPhi)*sin(g_CameraTheta);
-
-            camera->pos.x = player->pos.x;
-            camera->pos.y = player->pos.y;
-            camera->pos.z = player->pos.z;
-        }
-
         if(g_CPressed)
         {
             if(camera->type == ISOMETRIC)
@@ -235,17 +186,6 @@ void Scene::keyEventHandler()
             g_CPressed = false;
         }
     }
-    else if(norm(camera->pos - player->pos) > 0.0005) //if camera in animation, look at player. (norm test to solve runtime error when *(camera->lookat) == camera->pos)
-    {
-        camera->view_vector = *(camera->lookat) - camera->pos;
-    }
-    /*
-    if(camera->type != FREE)
-        player->draw();
-
-
-    camera->draw();
-    */
 }
 
 void Scene::renderInit()
@@ -335,6 +275,16 @@ void Scene::loadModels()
     ObjModel model3("../../data/sphere.obj");
     ComputeNormals(&model3);
     BuildTrianglesAndAddToVirtualScene(&model3);
+
+    ObjModel model4("../../data/rock_cube.obj");
+    ComputeNormals(&model4);
+    BuildTrianglesAndAddToVirtualScene(&model4);
+    //PrintObjModelInfo(&model4);
+
+    ObjModel model5("../../data/tree_cone.obj");
+    ComputeNormals(&model5);
+    BuildTrianglesAndAddToVirtualScene(&model5);
+
 }
 void Scene::loadModels(std::vector<std::string> paths)
 {

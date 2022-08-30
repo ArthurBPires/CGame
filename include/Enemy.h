@@ -2,10 +2,14 @@
 #define ENEMY_H
 
 #define _USE_MATH_DEFINES
+#include <cmath>
 #include "Scene.h"
 #include <cstdlib>
 #include <ctime>
-#include <cmath>
+
+#ifndef M_PI
+    #define M_PI 3.14159265358979323846
+#endif // M_PI
 
 class Enemy : public Dyn_Object
 {
@@ -68,7 +72,7 @@ void Enemy::pathfinding()
         {
             z = dir.z * this->speed;
         }
-        float t = Scene::config.timeStep;
+        float t = Scene::config->t;
         this->velocity += vec4(x,y,z,0.0)*t;
     }
 }

@@ -48,9 +48,45 @@ void Camera::draw()
     // Computamos a matriz "View" utilizando os parâmetros da câmera para
     // definir o sistema de coordenadas da câmera.  Veja slides 2-14, 184-190 e 236-242 do documento Aula_08_Sistemas_de_Coordenadas.pdf.
     //m.lock();
-    vec4 cameraPos = pos;
+    if(!inAnimation)
+    {
 
-    view = Matrix_Camera_View(cameraPos, view_vector, up_vector);
+        if(type == LOOKAT)
+        {
+            pos.x = r*cos(g_CameraPhi)*sin(g_CameraTheta);
+            pos.y = r*sin(g_CameraPhi);
+            pos.z = r*cos(g_CameraPhi)*cos(g_CameraTheta);
+
+            // Abaixo definimos as varáveis que efetivamente definem a câmera virtual.
+            // Veja slides 195-227 e 229-234 do documento Aula_08_Sistemas_de_Coordenadas.pdf.
+            view_vector = *lookat - pos; // Vetor "view", sentido para onde a câmera está virada
+        }
+        else if(type == ISOMETRIC)
+        {
+            pos.x = lookat->x;
+            pos.y = lookat->y + 15.0;
+            pos.z = lookat->z + 3.0;
+
+            // Abaixo definimos as varáveis que efetivamente definem a câmera virtual.
+            // Veja slides 195-227 e 229-234 do documento Aula_08_Sistemas_de_Coordenadas.pdf.
+            view_vector = *lookat - pos; // Vetor "view", sentido para onde a câmera está virada
+        }
+        else if(type == FREE)
+        {
+            pos = *lookat;
+
+            // Vetor "view", sentido para onde a câmera está virada
+            view_vector.z = -cos(g_CameraPhi)*cos(g_CameraTheta);
+            view_vector.y = -sin(g_CameraPhi);
+            view_vector.x = -cos(g_CameraPhi)*sin(g_CameraTheta);
+        }
+    }
+    else if(norm(pos - *lookat) > 0.0005) //if camera in animation, look at player. (norm test to solve runtime error when *(camera->lookat) == camera->pos)
+    {
+        view_vector = *lookat - pos;
+    }
+
+    view = Matrix_Camera_View(pos, view_vector, up_vector);
     //m.unlock();
 
     if (g_UsePerspectiveProjection)

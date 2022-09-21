@@ -9,7 +9,8 @@ struct Configuration
     float enemyHPMod = 1.0;
     float enemySpeedMod = 1.0;
     float enemyMaxSpeedMod = 1.0;
-    float t = 1.0 / 60.0;
+    float framesPerSecond = 60.0;
+    float t = 1.0 / framesPerSecond;
 
     Configuration(float playerHPMod = 1.0,float playerSpeedMod = 1.0,float enemyHPMod = 1.0,float enemySpeedMod = 1.0,float enemyMaxSpeedMod = 1.0):
         playerHPMod(playerHPMod),playerSpeedMod(playerSpeedMod),enemyHPMod(enemyHPMod),enemySpeedMod(enemySpeedMod),enemyMaxSpeedMod(enemyMaxSpeedMod){};

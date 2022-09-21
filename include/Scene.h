@@ -52,33 +52,35 @@ std::vector<Object *> Scene::objects;
 Scene::Scene() {srand (static_cast <unsigned> (time(0)));};
 Scene::~Scene() {};
 
-void bezierCurve(int duration, int frames, std::vector<vec4> points, vec4 * position)
+std::vector<glm::vec4> bezierCurve(float duration, std::vector<glm::vec4> points)
 {
-    int delay = std::round(duration / frames);
+    double frames = duration * Scene::config->framesPerSecond;
 
     float step = (float)(1.0f / frames);
 
+    std::vector<glm::vec4> posPerFrame;
+
     for(float t = 0.0f; t < 1.0f; t += step)
     {
-        std::vector<vec4> pointsAux = points;
+        std::vector<glm::vec4> pointsAux = points;
         do
         {
             int degree = pointsAux.size() - 1;
             for(int i = 0; i < degree; i++)
             {
-                vec4 a = pointsAux.front();
+                glm::vec4 a = pointsAux.front();
                 pointsAux.erase(pointsAux.begin());
-                vec4 b = pointsAux.front();
-                vec4 c = a + t * (b - a);
+                glm::vec4 b = pointsAux.front();
+                glm::vec4 c = a + t * (b - a);
                 pointsAux.push_back(c);
             }
             pointsAux.erase(pointsAux.begin());
         } while(pointsAux.size() > 1);
 
-        *position = pointsAux.front();
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(delay));
+        posPerFrame.push_back(pointsAux.front());
     }
+
+    return posPerFrame;
 }
 
 void cameraZoomIn()
@@ -91,7 +93,27 @@ void cameraZoomIn()
     vec4 endPoint = Scene::player->pos;
     endPoint.y = 1.0f;
     points.push_back(endPoint);
-    bezierCurve(500,100,points,&(Scene::camera->pos));
+
+	std::vector<glm::vec4> anim = bezierCurve(0.5,points);
+
+	double nowTime = 0, deltaTime = 0, lastTime = glfwGetTime();
+
+	while(!anim.empty())
+	{
+		nowTime = glfwGetTime();
+		deltaTime += (nowTime - lastTime) * Scene::config->framesPerSecond;
+		lastTime = nowTime;
+
+		while(deltaTime >= 1.0 && !anim.empty())
+		{
+			Scene::camera->pos = anim.front();
+			anim.erase(anim.begin());
+
+			deltaTime--;
+		}
+	}
+
+
     Scene::camera->type=FREE;
     Scene::camera->inAnimation = false;
 }
@@ -105,7 +127,26 @@ void cameraZoomOut()
     points.push_back(vec4(Scene::camera->pos.x,Scene::camera->pos.y,Scene::camera->pos.z + 3.0,1.0));
     points.push_back(glm::vec4(Scene::camera->lookat->x,Scene::camera->pos.y,(Scene::camera->lookat->z + 3.0),1.0));
     points.push_back(glm::vec4(Scene::camera->lookat->x,Scene::camera->lookat->y + 15.0,Scene::camera->lookat->z + 3.0,1.0));
-    bezierCurve(500,100,points,&(Scene::camera->pos));
+
+    std::vector<glm::vec4> anim = bezierCurve(0.5,points);
+
+	double nowTime = 0, deltaTime = 0, lastTime = glfwGetTime();
+
+	while(!anim.empty())
+	{
+		nowTime = glfwGetTime();
+		deltaTime += (nowTime - lastTime) * Scene::config->framesPerSecond;
+		lastTime = nowTime;
+
+		while(deltaTime >= 1.0 && !anim.empty())
+		{
+			Scene::camera->pos = anim.front();
+			anim.erase(anim.begin());
+
+			deltaTime--;
+		}
+	}
+
     Scene::camera->inAnimation = false;
 }
 
@@ -257,15 +298,6 @@ void Scene::renderOther()
 
 void Scene::loadModels()
 {
-    /*
-    std::string path = "../../data";
-    for (const auto & entry : fs::directory_iterator(path.c_str()))
-    {
-        ObjModel spheremodel(entry.path().string().c_str());
-        ComputeNormals(&spheremodel);
-        BuildTrianglesAndAddToVirtualScene(&spheremodel);
-    }
-    */
     ObjModel model1("../../data/bunny.obj");
     ComputeNormals(&model1);
     BuildTrianglesAndAddToVirtualScene(&model1);
@@ -344,7 +376,7 @@ void drawHitbox()
 
         vec3 Aux = object->Kd;
 
-        if(object->contact || (object->i < 500))
+        if(object->contact || (object->i < 300))
         {
             object->Kd = vec3(1.0,0.0,0.0);
             object->i++;

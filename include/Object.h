@@ -61,38 +61,6 @@ void Object::draw()
     float data_values[10] = {Kd.x,Kd.y,Kd.z,Ks.x,Ks.y,Ks.z,Ka.x,Ka.y,Ka.z,q};
     glUniform1fv(spectral_values_uniform, 10, data_values);
     DrawVirtualObject(model.c_str());
-
-    //float sclX = norm(hitbox.at(5)-hitbox.at(1));
-    //float sclY = norm(hitbox.at(7)-hitbox.at(1));
-    //float sclZ = norm(hitbox.at(6)-hitbox.at(1));
-
-    /*
-    float sclX = hitbox.at(0).x - hitbox.at(1).x;
-    float sclY = hitbox.at(0).y - hitbox.at(1).y;
-    float sclZ = hitbox.at(0).z - hitbox.at(1).z;
-
-    glm::mat4 modelMatrix = Matrix_Identity(); // Transformação identidade de modelagem
-    modelMatrix = Matrix_Translate(pos.x,pos.y,pos.z)
-              * Matrix_Rotate_Z(rot.x)
-              * Matrix_Rotate_Y(rot.y)
-              * Matrix_Rotate_X(rot.z)
-              * Matrix_Scale(sclX,sclY,sclZ);
-    glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(modelMatrix));
-
-    vec3 Aux = Kd;
-
-    if(contact || (i < 500))
-    {
-        Kd = vec3(1.0,0.0,0.0);
-        i++;
-    }
-
-    float data_values[10] = {Kd.x,Kd.y,Kd.z,Ks.x,Ks.y,Ks.z,Ka.x,Ka.y,Ka.z,q};
-    glUniform1fv(spectral_values_uniform, 10, data_values);
-    DrawVirtualObject("cube");
-
-    Kd = Aux;
-    */
 }
 
 Object::~Object()

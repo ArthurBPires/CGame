@@ -44,8 +44,6 @@ void dynamic()
                                 vec4 distEnem = object2->pos - object->pos;
                                 object->pos += (4.5f * normalize(-distEnem) * Scene::config->t);
                             }
-
-                            //enemy->contact = true;
                         }
                     }
                 }
@@ -53,7 +51,6 @@ void dynamic()
 
             deltaTime--;
         }
-        //std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 }
 
@@ -81,7 +78,7 @@ void Scene::test()
 
     //Adds sphere in pos(-1.0,0.0,0.0);
     Dyn_Object sphere("sphere");
-    sphere.pos.x = -1.0;
+    sphere.pos.x = -15.0;
 
     //Gives it acceleration;
     sphere.acceleration = 0.1f * normalize(vec4(0.0,0.0,-1.0,0.0));
@@ -136,20 +133,14 @@ void Scene::test()
         Scene::renderBaseline();
 
         camera->draw();
-        //player->draw();
 
-        /*
-        if(camera->type != FREE)
-            player->draw();
-        */
         for(auto * object : objects)
         {
-            if(typeid(*object) != typeid(*player))
+            if(instanceof<Player>(object))
                 object->draw();
             else if(camera->type != FREE)
                 object->draw();
         }
-        //ground.draw();
 
         while(deltaTime >= 1.0)
         {

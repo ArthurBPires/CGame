@@ -4,6 +4,8 @@
 #include "Player.h"
 #include "Camera.h"
 #include "Timer.h"
+#include "collisions.h"
+
 #include <iostream>
 #include <string>
 #include <vector>
@@ -84,9 +86,11 @@ void cameraZoomIn()
     Scene::camera->inAnimation = true;
     std::vector<vec4> points = std::vector<vec4>();
     points.push_back(Scene::camera->pos);
-    points.push_back(glm::vec4(Scene::camera->pos.x,0.0,(Scene::camera->pos.z + 3.0),1.0));
-    points.push_back(vec4(Scene::player->pos.x,0.0,Scene::player->pos.z,1.0));
-    points.push_back(Scene::player->pos);
+    points.push_back(glm::vec4(Scene::camera->pos.x,1.0f,(Scene::camera->pos.z + 3.0),1.0));
+    points.push_back(vec4(Scene::player->pos.x,1.0f,Scene::player->pos.z,1.0));
+    vec4 endPoint = Scene::player->pos;
+    endPoint.y = 1.0f;
+    points.push_back(endPoint);
     bezierCurve(500,100,points,&(Scene::camera->pos));
     Scene::camera->type=FREE;
     Scene::camera->inAnimation = false;
@@ -98,8 +102,8 @@ void cameraZoomOut()
     std::vector<vec4> points;
 
     points.push_back(Scene::camera->pos);
-    points.push_back(vec4(Scene::camera->pos.x,0.0,Scene::camera->pos.z + 3.0,1.0));
-    points.push_back(glm::vec4(Scene::camera->lookat->x,0.0,(Scene::camera->lookat->z + 3.0),1.0));
+    points.push_back(vec4(Scene::camera->pos.x,Scene::camera->pos.y,Scene::camera->pos.z + 3.0,1.0));
+    points.push_back(glm::vec4(Scene::camera->lookat->x,Scene::camera->pos.y,(Scene::camera->lookat->z + 3.0),1.0));
     points.push_back(glm::vec4(Scene::camera->lookat->x,Scene::camera->lookat->y + 15.0,Scene::camera->lookat->z + 3.0,1.0));
     bezierCurve(500,100,points,&(Scene::camera->pos));
     Scene::camera->inAnimation = false;
@@ -117,8 +121,7 @@ void Scene::keyEventHandler()
             if(camera->type == FREE)
             {
                 glm::vec4 w = camera->view_vector;
-                w.y = Scene::player->pos.y;
-
+                w.y = player->pos.y;
                 w = normalize(w);
 
                 player->pos += w*player->speed*t;
@@ -132,7 +135,6 @@ void Scene::keyEventHandler()
             {
                 glm::vec4 w = camera->view_vector;
                 w.y = player->pos.y;
-
                 w = normalize(w);
 
                 player->pos -= w*player->speed*t;
@@ -285,6 +287,10 @@ void Scene::loadModels()
     ComputeNormals(&model5);
     BuildTrianglesAndAddToVirtualScene(&model5);
 
+    ObjModel model6("../../data/cube.obj");
+    ComputeNormals(&model6);
+    BuildTrianglesAndAddToVirtualScene(&model6);
+
 }
 void Scene::loadModels(std::vector<std::string> paths)
 {
@@ -301,6 +307,57 @@ void Scene::clearObjects()
     for (Object * x : objects) {
         delete x;
     }
+}
+
+void drawHitbox()
+{
+    for(auto * object : Scene::objects)
+    {
+        std::string object_name;
+
+        float sclX,sclY,sclZ;
+        sclX = sclY = sclZ = 1;
+
+        if(object->hitBoxType == BOX || object->hitBoxType == SPHERE)
+        {
+            object_name = "cube";
+            sclX = object->hitbox.at(0).x - object->hitbox.at(1).x;
+            sclY = object->hitbox.at(0).y - object->hitbox.at(1).y;
+            sclZ = object->hitbox.at(0).z - object->hitbox.at(1).z;
+        }
+        else if(object->hitBoxType == SPHERE)
+            object_name = "sphere";
+        else
+            continue;
+
+
+
+        glm::mat4 modelMatrix = Matrix_Identity(); // Transformação identidade de modelagem
+
+        modelMatrix = Matrix_Translate(object->pos.x,object->pos.y,object->pos.z)
+                  * Matrix_Rotate_Z(object->rot.x)
+                  * Matrix_Rotate_Y(object->rot.y)
+                  * Matrix_Rotate_X(object->rot.z)
+                  * Matrix_Scale(sclX * object->scl.x,sclY * object->scl.y,sclZ * object->scl.z);
+
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(modelMatrix));
+
+        vec3 Aux = object->Kd;
+
+        if(object->contact || (object->i < 500))
+        {
+            object->Kd = vec3(1.0,0.0,0.0);
+            object->i++;
+        }
+
+        float data_values[10] = {object->Kd.x,object->Kd.y,object->Kd.z,object->Ks.x,object->Ks.y,object->Ks.z,object->Ka.x,object->Ka.y,object->Ka.z,object->q};
+        glUniform1fv(spectral_values_uniform, 10, data_values);
+
+        DrawVirtualObject(object_name.c_str());
+
+        object->Kd = Aux;
+    }
+
 }
 
 #endif // SCENE_H

@@ -97,6 +97,7 @@ struct ObjModel
     tinyobj::attrib_t                 attrib;
     std::vector<tinyobj::shape_t>     shapes;
     std::vector<tinyobj::material_t>  materials;
+    std::vector<glm::vec4>            hitbox;
 
     // Este construtor lê o modelo de um arquivo utilizando a biblioteca tinyobjloader.
     // Veja: https://github.com/syoyo/tinyobjloader
@@ -113,7 +114,99 @@ struct ObjModel
         if (!ret)
             throw std::runtime_error("Erro ao carregar modelo.");
 
+        makeHitbox();
+
         printf("OK.\n");
+    }
+
+    void makeHitbox()
+    {
+        glm::vec4 pointMax(0,0,0,1.0f);
+        glm::vec4 pointMin(std::numeric_limits<float>::max(),std::numeric_limits<float>::max(),std::numeric_limits<float>::max(),1.0f);
+
+        for (size_t v = 0; v < attrib.vertices.size() / 3; v++) {
+            glm::vec4 point;
+            point.x = static_cast<const double>(attrib.vertices[3 * v + 0]);
+            point.y = static_cast<const double>(attrib.vertices[3 * v + 1]);
+            point.z = static_cast<const double>(attrib.vertices[3 * v + 2]);
+            point.w = 1.0f;
+
+            if(point.x < pointMin.x)
+            {
+                pointMin.x = point.x;
+            }
+            if(point.y < pointMin.y)
+            {
+                pointMin.y = point.y;
+            }
+            if(point.z < pointMin.z)
+            {
+                pointMin.z = point.z;
+            }
+
+            if(point.x > pointMax.x)
+            {
+                pointMax.x = point.x;
+            }
+            if(point.y > pointMax.y)
+            {
+                pointMax.y = point.y;
+            }
+            if(point.z > pointMax.z)
+            {
+                pointMax.z = point.z;
+            }
+        }
+        float adjustVal = 0.75f;
+
+        glm::vec4 point1 = glm::vec4(pointMax);
+        point1 = adjustVal * point1;
+        point1.w = 1.0f;
+        hitbox.push_back(point1);
+
+        glm::vec4 point2 = glm::vec4(pointMin);
+        point2 = adjustVal * point2;
+        point2.w = 1.0f;
+        hitbox.push_back(glm::vec4(point2));
+
+        glm::vec4 point3 = glm::vec4(pointMax.x,pointMax.y,pointMin.z,1.0f);
+        point3 = adjustVal * point3;
+        point3.w = 1.0f;
+        hitbox.push_back(glm::vec4(point3));
+
+        glm::vec4 point4 = glm::vec4(pointMax.x,pointMin.y,pointMax.z,1.0f);
+        point4 = adjustVal * point4;
+        point4.w = 1.0f;
+        hitbox.push_back(glm::vec4(point4));
+
+        glm::vec4 point5 = glm::vec4(pointMin.x,pointMax.y,pointMax.z,1.0f);
+        point5 = adjustVal * point5;
+        point5.w = 1.0f;
+        hitbox.push_back(glm::vec4(point5));
+
+        glm::vec4 point6 = glm::vec4(pointMax.x,pointMin.y,pointMin.z,1.0f);
+        point6 = adjustVal * point6;
+        point6.w = 1.0f;
+        hitbox.push_back(glm::vec4(point6));
+
+        glm::vec4 point7 = glm::vec4(pointMin.x,pointMin.y,pointMax.z,1.0f);
+        point7 = adjustVal * point7;
+        point7.w = 1.0f;
+        hitbox.push_back(glm::vec4(point7));
+
+        glm::vec4 point8 = glm::vec4(pointMin.x,pointMax.y,pointMin.z,1.0f);
+        point8 = adjustVal * point8;
+        point8.w = 1.0f;
+        hitbox.push_back(glm::vec4(point8));
+
+        /*
+        printf("%f\n",norm(hitbox.at(0) - hitbox.at(1)));
+        printf("%f\n",norm(hitbox.at(1) - hitbox.at(2)));
+        printf("%f\n",norm(hitbox.at(2) - hitbox.at(3)));
+        printf("%f\n",norm(hitbox.at(3) - hitbox.at(4)));
+        printf("%f\n",norm(hitbox.at(5) - hitbox.at(6)));
+        printf("%f\n",norm(hitbox.at(6) - hitbox.at(7)));
+        */
     }
 };
 
@@ -295,6 +388,8 @@ struct SceneObject
     size_t       num_indices; // Número de índices do objeto dentro do vetor indices[] definido em BuildTrianglesAndAddToVirtualScene()
     GLenum       rendering_mode; // Modo de rasterização (GL_TRIANGLES, GL_TRIANGLE_STRIP, etc.)
     GLuint       vertex_array_object_id; // ID do VAO onde estão armazenados os atributos do modelo
+
+    std::vector<glm::vec4> hitbox;
 };
 
 // A cena virtual é uma lista de objetos nomeados, guardados em um dicionário
@@ -466,6 +561,8 @@ void BuildTrianglesAndAddToVirtualScene(ObjModel* model)
         theobject.num_indices    = last_index - first_index + 1; // Número de indices
         theobject.rendering_mode = GL_TRIANGLES;       // Índices correspondem ao tipo de rasterização GL_TRIANGLES.
         theobject.vertex_array_object_id = vertex_array_object_id;
+
+        theobject.hitbox = model->hitbox;
 
         g_VirtualScene[model->shapes[shape].name] = theobject;
     }

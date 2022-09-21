@@ -5,7 +5,9 @@
 #include "Camera.h"
 #include "scene.h"
 #include "Timer.h"
+#include "collisions.h"
 #include <iostream>
+#include <typeinfo>
 
 void dynamic()
 {
@@ -19,29 +21,31 @@ void dynamic()
 
         while(deltaTime >= 1.0)
         {
-            for(auto & object : Scene::objects)
+            for(auto * object : Scene::objects)
             {
                 object->move();
-            }
-            for(auto & enemy : Scene::enemies)
-            {
-                enemy->pathfinding();
 
-                //In here, we give a repulsion to enemies close to player
-                vec4 distVec = Scene::player->pos - enemy->pos;
-                if(norm(distVec) < 1.2)
+                if(instanceof<Enemy>(object))
+                        static_cast<Enemy *>(object)->pathfinding();
+
+                for(auto * object2 : Scene::objects)
                 {
-                    enemy->velocity = (4.0f * normalize(-distVec));
-                }
-                //In here, we give collision to enemies
-                for(auto & enemy2 : Scene::enemies)
-                {
-                    if(enemy != enemy2)
+                    if(object != object2)
                     {
-                        vec4 distEnem = enemy2->pos - enemy->pos;
-                        if(norm(distEnem) < 1.2)
+                        if(object->isHit(object,object2))
                         {
-                            enemy->pos += (3.0f * normalize(-distEnem) * Scene::config->t);
+                            if(instanceof<Player>(object) && instanceof<Enemy>(object2))
+                            {
+                                vec4 distVec = object->pos - object2->pos;
+                                static_cast<Enemy *>(object2)->velocity = (4.0f * normalize(-distVec));
+                            }
+                            else if(!(instanceof<Enemy>(object) && instanceof<Player>(object2)))
+                            {
+                                vec4 distEnem = object2->pos - object->pos;
+                                object->pos += (4.5f * normalize(-distEnem) * Scene::config->t);
+                            }
+
+                            //enemy->contact = true;
                         }
                     }
                 }
@@ -62,13 +66,16 @@ void Scene::test()
 
     float speed = 4.0;
     player = new Player("bunny",vec3(0.08,0.4,0.8),vec3(0.8,0.8,0.8),vec3(0.04,0.2,0.4),32.0,100,speed);
-    Scene::player->pos.x = 6.0;
+    player->pos.x = 6.0;
+    player->hitBoxType = SPHERE;
+    player->sphereRadius = 1.2f;
 
-    //Scene::objects.push_back(player);
+    Scene::objects.push_back(player);
 
     camera = new Camera(vec4(0.0,0.0,0.0,1.0));
     camera->lookat = &Scene::player->pos;
     camera->farplane = -50.0f;
+    camera->hitBoxType = NONE;
 
     //Scene::objects.push_back(camera);
 
@@ -81,23 +88,26 @@ void Scene::test()
     Scene::objects.push_back(&sphere);
 
     //Ground
-    Scene::objects.push_back(new Object("plane",vec4(0.0,-1.00,0.0,1.0),vec3(0.0,0.0,0.0),vec3(20.0,1.0,20.0),vec3(0.2,0.7,0.15),vec3(0.1,0.1,0.1),vec3(0.0,0.0,0.0),20.0));
+    Object ground("plane",vec4(0.0,0.0,0.0,1.0),vec3(0.0,0.0,0.0),vec3(20.0,1.0,20.0),vec3(0.2,0.7,0.15),vec3(0.1,0.1,0.1),vec3(0.0,0.0,0.0),20.0);
+    ground.hitBoxType = NONE;
+    Scene::objects.push_back(&ground);
 
     //Trees
-    Scene::objects.push_back(new Object("tree_cone",vec4(1.0,-1.0,1.0,1.0),vec3(0.0,0.0,0.0),vec3(3.0,3.0,3.0),vec3(0.0,0.5,0.1),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),5.0));
-    Scene::objects.push_back(new Object("tree_cone",vec4(5.0,-1.0,8.0,1.0),vec3(0.0,0.0,0.0),vec3(2.0,2.0,2.0),vec3(0.0,0.5,0.1),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),5.0));
-    Scene::objects.push_back(new Object("tree_cone",vec4(-4.0,-1.0,7.0,1.0),vec3(0.0,0.0,0.0),vec3(3.5,3.5,3.5),vec3(0.0,0.5,0.1),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),5.0));
-    Scene::objects.push_back(new Object("tree_cone",vec4(-3.0,-1.0,-5.0,1.0),vec3(0.0,0.0,0.0),vec3(2.0,2.0,2.0),vec3(0.0,0.5,0.1),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),5.0));
-    Scene::objects.push_back(new Object("tree_cone",vec4(2.0,-1.0,-9.0,1.0),vec3(0.0,0.0,0.0),vec3(4.0,4.0,4.0),vec3(0.0,0.5,0.1),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),5.0));
-    Scene::objects.push_back(new Object("tree_cone",vec4(13.0,-1.0,-8.0,1.0),vec3(0.0,0.0,0.0),vec3(3.5,3.5,3.5),vec3(0.0,0.5,0.1),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),5.0));
-    Scene::objects.push_back(new Object("tree_cone",vec4(16.0,-1.0,-12.0,1.0),vec3(0.0,0.0,0.0),vec3(2.0,2.8,2.0),vec3(0.0,0.5,0.1),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),5.0));
-    Scene::objects.push_back(new Object("tree_cone",vec4(8.0,-1.0,-16.0,1.0),vec3(0.0,0.0,0.0),vec3(2.2,2.2,2.2),vec3(0.0,0.5,0.1),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),5.0));
+    Scene::objects.push_back(new Object("tree_cone",vec4(1.0,0.0,1.0,1.0),vec3(0.0,0.0,0.0),vec3(3.0,3.0,3.0),vec3(0.0,0.5,0.1),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),5.0));
+    Scene::objects.push_back(new Object("tree_cone",vec4(5.0,0.0,8.0,1.0),vec3(0.0,0.0,0.0),vec3(2.0,2.0,2.0),vec3(0.0,0.5,0.1),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),5.0));
+    Scene::objects.push_back(new Object("tree_cone",vec4(-4.0,0.0,7.0,1.0),vec3(0.0,0.0,0.0),vec3(3.5,3.5,3.5),vec3(0.0,0.5,0.1),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),5.0));
+    Scene::objects.push_back(new Object("tree_cone",vec4(-3.0,0.0,-5.0,1.0),vec3(0.0,0.0,0.0),vec3(2.0,2.0,2.0),vec3(0.0,0.5,0.1),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),5.0));
+    Scene::objects.push_back(new Object("tree_cone",vec4(2.0,0.0,-9.0,1.0),vec3(0.0,0.0,0.0),vec3(4.0,4.0,4.0),vec3(0.0,0.5,0.1),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),5.0));
+    Scene::objects.push_back(new Object("tree_cone",vec4(13.0,0.0,-8.0,1.0),vec3(0.0,0.0,0.0),vec3(3.5,3.5,3.5),vec3(0.0,0.5,0.1),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),5.0));
+    Scene::objects.push_back(new Object("tree_cone",vec4(16.0,0.0,-12.0,1.0),vec3(0.0,0.0,0.0),vec3(2.0,2.8,2.0),vec3(0.0,0.5,0.1),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),5.0));
+    Scene::objects.push_back(new Object("tree_cone",vec4(8.0,0.0,-16.0,1.0),vec3(0.0,0.0,0.0),vec3(2.2,2.2,2.2),vec3(0.0,0.5,0.1),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),5.0));
 
     //Rocks
-    Scene::objects.push_back(new Object("rock_cube",vec4(0.0,-1.0,0.0,1.0),vec3(0.0,0.0,0.0),vec3(1.0,1.0,1.0),vec3(0.5,0.4,0.3),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),2.0));
-    Scene::objects.push_back(new Object("rock_cube",vec4(4.0,-1.0,-18.0,1.0),vec3(0.0,0.0,0.0),vec3(1.0,2.0,2.4),vec3(0.5,0.4,0.3),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),2.0));
+    Scene::objects.push_back(new Object("rock_cube",vec4(0.0,0.0,0.0,1.0),vec3(0.0,0.0,0.0),vec3(1.0,1.0,1.0),vec3(0.5,0.4,0.3),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),2.0));
+    Scene::objects.push_back(new Object("rock_cube",vec4(4.0,0.0,-18.0,1.0),vec3(0.0,0.0,0.0),vec3(1.0,2.0,2.4),vec3(0.5,0.4,0.3),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),2.0));
 
     //Enemies
+
     Scene::enemies.push_back(new Enemy("bunny",vec3(0.8,0.4,0.4),vec3(0.8,0.8,0.8),vec3(0.8,0.2,0.2),32.0,100,1.5,1.0));
     Scene::objects.push_back( Scene::enemies.back());
 
@@ -127,9 +137,19 @@ void Scene::test()
 
         camera->draw();
         //player->draw();
+
+        /*
         if(camera->type != FREE)
             player->draw();
-
+        */
+        for(auto * object : objects)
+        {
+            if(typeid(*object) != typeid(*player))
+                object->draw();
+            else if(camera->type != FREE)
+                object->draw();
+        }
+        //ground.draw();
 
         while(deltaTime >= 1.0)
         {
@@ -137,10 +157,8 @@ void Scene::test()
             deltaTime--;
         }
 
-        for(auto & object : objects)
-        {
-            object->draw();
-        }
+        if(g_HPressed)
+            drawHitbox();
 
         Scene::renderOther();
     }

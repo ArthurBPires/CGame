@@ -4,6 +4,8 @@
 #include "Player.h"
 #include "Camera.h"
 #include "Timer.h"
+#include "collisions.h"
+
 #include <iostream>
 #include <string>
 #include <vector>
@@ -50,33 +52,35 @@ std::vector<Object *> Scene::objects;
 Scene::Scene() {srand (static_cast <unsigned> (time(0)));};
 Scene::~Scene() {};
 
-void bezierCurve(int duration, int frames, std::vector<vec4> points, vec4 * position)
+std::vector<glm::vec4> bezierCurve(float duration, std::vector<glm::vec4> points)
 {
-    int delay = std::round(duration / frames);
+    double frames = duration * Scene::config->framesPerSecond;
 
     float step = (float)(1.0f / frames);
 
+    std::vector<glm::vec4> posPerFrame;
+
     for(float t = 0.0f; t < 1.0f; t += step)
     {
-        std::vector<vec4> pointsAux = points;
+        std::vector<glm::vec4> pointsAux = points;
         do
         {
             int degree = pointsAux.size() - 1;
             for(int i = 0; i < degree; i++)
             {
-                vec4 a = pointsAux.front();
+                glm::vec4 a = pointsAux.front();
                 pointsAux.erase(pointsAux.begin());
-                vec4 b = pointsAux.front();
-                vec4 c = a + t * (b - a);
+                glm::vec4 b = pointsAux.front();
+                glm::vec4 c = a + t * (b - a);
                 pointsAux.push_back(c);
             }
             pointsAux.erase(pointsAux.begin());
         } while(pointsAux.size() > 1);
 
-        *position = pointsAux.front();
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(delay));
+        posPerFrame.push_back(pointsAux.front());
     }
+
+    return posPerFrame;
 }
 
 void cameraZoomIn()
@@ -84,10 +88,32 @@ void cameraZoomIn()
     Scene::camera->inAnimation = true;
     std::vector<vec4> points = std::vector<vec4>();
     points.push_back(Scene::camera->pos);
-    points.push_back(glm::vec4(Scene::camera->pos.x,0.0,(Scene::camera->pos.z + 3.0),1.0));
-    points.push_back(vec4(Scene::player->pos.x,0.0,Scene::player->pos.z,1.0));
-    points.push_back(Scene::player->pos);
-    bezierCurve(500,100,points,&(Scene::camera->pos));
+    points.push_back(glm::vec4(Scene::camera->pos.x,1.0f,(Scene::camera->pos.z + 3.0),1.0));
+    points.push_back(vec4(Scene::player->pos.x,1.0f,Scene::player->pos.z,1.0));
+    vec4 endPoint = Scene::player->pos;
+    endPoint.y = 1.0f;
+    points.push_back(endPoint);
+
+	std::vector<glm::vec4> anim = bezierCurve(0.5,points);
+
+	double nowTime = 0, deltaTime = 0, lastTime = glfwGetTime();
+
+	while(!anim.empty())
+	{
+		nowTime = glfwGetTime();
+		deltaTime += (nowTime - lastTime) * Scene::config->framesPerSecond;
+		lastTime = nowTime;
+
+		while(deltaTime >= 1.0 && !anim.empty())
+		{
+			Scene::camera->pos = anim.front();
+			anim.erase(anim.begin());
+
+			deltaTime--;
+		}
+	}
+
+
     Scene::camera->type=FREE;
     Scene::camera->inAnimation = false;
 }
@@ -98,10 +124,29 @@ void cameraZoomOut()
     std::vector<vec4> points;
 
     points.push_back(Scene::camera->pos);
-    points.push_back(vec4(Scene::camera->pos.x,0.0,Scene::camera->pos.z + 3.0,1.0));
-    points.push_back(glm::vec4(Scene::camera->lookat->x,0.0,(Scene::camera->lookat->z + 3.0),1.0));
+    points.push_back(vec4(Scene::camera->pos.x,Scene::camera->pos.y,Scene::camera->pos.z + 3.0,1.0));
+    points.push_back(glm::vec4(Scene::camera->lookat->x,Scene::camera->pos.y,(Scene::camera->lookat->z + 3.0),1.0));
     points.push_back(glm::vec4(Scene::camera->lookat->x,Scene::camera->lookat->y + 15.0,Scene::camera->lookat->z + 3.0,1.0));
-    bezierCurve(500,100,points,&(Scene::camera->pos));
+
+    std::vector<glm::vec4> anim = bezierCurve(0.5,points);
+
+	double nowTime = 0, deltaTime = 0, lastTime = glfwGetTime();
+
+	while(!anim.empty())
+	{
+		nowTime = glfwGetTime();
+		deltaTime += (nowTime - lastTime) * Scene::config->framesPerSecond;
+		lastTime = nowTime;
+
+		while(deltaTime >= 1.0 && !anim.empty())
+		{
+			Scene::camera->pos = anim.front();
+			anim.erase(anim.begin());
+
+			deltaTime--;
+		}
+	}
+
     Scene::camera->inAnimation = false;
 }
 
@@ -117,8 +162,7 @@ void Scene::keyEventHandler()
             if(camera->type == FREE)
             {
                 glm::vec4 w = camera->view_vector;
-                w.y = Scene::player->pos.y;
-
+                w.y = player->pos.y;
                 w = normalize(w);
 
                 player->pos += w*player->speed*t;
@@ -132,7 +176,6 @@ void Scene::keyEventHandler()
             {
                 glm::vec4 w = camera->view_vector;
                 w.y = player->pos.y;
-
                 w = normalize(w);
 
                 player->pos -= w*player->speed*t;
@@ -255,15 +298,6 @@ void Scene::renderOther()
 
 void Scene::loadModels()
 {
-    /*
-    std::string path = "../../data";
-    for (const auto & entry : fs::directory_iterator(path.c_str()))
-    {
-        ObjModel spheremodel(entry.path().string().c_str());
-        ComputeNormals(&spheremodel);
-        BuildTrianglesAndAddToVirtualScene(&spheremodel);
-    }
-    */
     ObjModel model1("../../data/bunny.obj");
     ComputeNormals(&model1);
     BuildTrianglesAndAddToVirtualScene(&model1);
@@ -285,6 +319,10 @@ void Scene::loadModels()
     ComputeNormals(&model5);
     BuildTrianglesAndAddToVirtualScene(&model5);
 
+    ObjModel model6("../../data/cube.obj");
+    ComputeNormals(&model6);
+    BuildTrianglesAndAddToVirtualScene(&model6);
+
 }
 void Scene::loadModels(std::vector<std::string> paths)
 {
@@ -301,6 +339,57 @@ void Scene::clearObjects()
     for (Object * x : objects) {
         delete x;
     }
+}
+
+void drawHitbox()
+{
+    for(auto * object : Scene::objects)
+    {
+        std::string object_name;
+
+        float sclX,sclY,sclZ;
+        sclX = sclY = sclZ = 1;
+
+        if(object->hitBoxType == BOX || object->hitBoxType == SPHERE)
+        {
+            object_name = "cube";
+            sclX = object->hitbox.at(0).x - object->hitbox.at(1).x;
+            sclY = object->hitbox.at(0).y - object->hitbox.at(1).y;
+            sclZ = object->hitbox.at(0).z - object->hitbox.at(1).z;
+        }
+        else if(object->hitBoxType == SPHERE)
+            object_name = "sphere";
+        else
+            continue;
+
+
+
+        glm::mat4 modelMatrix = Matrix_Identity(); // Transformação identidade de modelagem
+
+        modelMatrix = Matrix_Translate(object->pos.x,object->pos.y,object->pos.z)
+                  * Matrix_Rotate_Z(object->rot.x)
+                  * Matrix_Rotate_Y(object->rot.y)
+                  * Matrix_Rotate_X(object->rot.z)
+                  * Matrix_Scale(sclX * object->scl.x,sclY * object->scl.y,sclZ * object->scl.z);
+
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(modelMatrix));
+
+        vec3 Aux = object->Kd;
+
+        if(object->contact || (object->i < 300))
+        {
+            object->Kd = vec3(1.0,0.0,0.0);
+            object->i++;
+        }
+
+        float data_values[10] = {object->Kd.x,object->Kd.y,object->Kd.z,object->Ks.x,object->Ks.y,object->Ks.z,object->Ka.x,object->Ka.y,object->Ka.z,object->q};
+        glUniform1fv(spectral_values_uniform, 10, data_values);
+
+        DrawVirtualObject(object_name.c_str());
+
+        object->Kd = Aux;
+    }
+
 }
 
 #endif // SCENE_H

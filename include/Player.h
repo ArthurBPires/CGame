@@ -3,8 +3,10 @@
 
 #include "Dyn_Object.h"
 
+
 bool g_WPressed = false,g_SPressed = false,g_APressed = false,g_DPressed = false;
 bool g_CPressed = false;
+bool g_HPressed = false;
 
 class Player : public Dyn_Object
 {

@@ -48,6 +48,9 @@ void Camera::draw()
     // Computamos a matriz "View" utilizando os parâmetros da câmera para
     // definir o sistema de coordenadas da câmera.  Veja slides 2-14, 184-190 e 236-242 do documento Aula_08_Sistemas_de_Coordenadas.pdf.
     //m.lock();
+    vec4 lookAtOffset = *lookat;
+    lookAtOffset.y = 1.0f;
+
     if(!inAnimation)
     {
 
@@ -73,7 +76,7 @@ void Camera::draw()
         }
         else if(type == FREE)
         {
-            pos = *lookat;
+            pos = lookAtOffset;
 
             // Vetor "view", sentido para onde a câmera está virada
             view_vector.z = -cos(g_CameraPhi)*cos(g_CameraTheta);
@@ -81,9 +84,9 @@ void Camera::draw()
             view_vector.x = -cos(g_CameraPhi)*sin(g_CameraTheta);
         }
     }
-    else if(norm(pos - *lookat) > 0.0005) //if camera in animation, look at player. (norm test to solve runtime error when *(camera->lookat) == camera->pos)
+    else if(norm(pos - lookAtOffset) > 0.0005) //if camera in animation, look at player. (norm test to solve runtime error when *(camera->lookat) == camera->pos)
     {
-        view_vector = *lookat - pos;
+        view_vector = lookAtOffset - pos;
     }
 
     view = Matrix_Camera_View(pos, view_vector, up_vector);

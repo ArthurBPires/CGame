@@ -5,12 +5,20 @@
 
 using namespace glm;
 
+enum hitBoxType {BOX,SPHERE,NONE};
+
 class Object
 {
     public:
         bool contact = false;
+        unsigned long long i = 0;
+
+        hitBoxType hitBoxType = BOX;
+        float sphereRadius = 1.0f;
 
         std::string model;
+        glm::mat4 modelMatrix = Matrix_Identity(); // Transformação identidade de modelagem
+        std::vector<glm::vec4> hitbox;
         glm::vec4 pos = vec4(0.0f,0.0f,0.0f,1.0f);
         glm::vec3 rot = vec3(0.0f,0.0f,0.0f);
         glm::vec3 scl = vec3(1.0f,1.0f,1.0f);
@@ -22,14 +30,16 @@ class Object
         float q = 1.0; // Expoente especular para o modelo de iluminação de Phong
 
         Object(std::string model,vec4 pos, vec3 rot, vec3 scl, vec3 Kd, vec3 Ks, vec3 Ka, float q) :
-            model(model),pos(pos), rot(rot), scl(scl), Kd(Kd), Ks(Ks), Ka(Ka), q(q) {};
+            model(model),pos(pos), rot(rot), scl(scl), Kd(Kd), Ks(Ks), Ka(Ka), q(q) {hitbox = g_VirtualScene[model.c_str()].hitbox;};
         Object(std::string model,vec3 Kd, vec3 Ks, vec3 Ka, float q) :
-            model(model), Kd(Kd), Ks(Ks), Ka(Ka), q(q) {};
-        Object(std::string model) : model(model) {};
+            model(model), Kd(Kd), Ks(Ks), Ka(Ka), q(q) {hitbox = g_VirtualScene[model.c_str()].hitbox;};
+        Object(std::string model) : model(model) {hitbox = g_VirtualScene[model.c_str()].hitbox;};
 
         Object(vec4 pos) : pos(pos) {};
 
         virtual void draw();
+
+        bool isHit(Object * obj1, Object * obj2);
 
         virtual void move() {};
         virtual ~Object();
@@ -41,7 +51,6 @@ class Object
 
 void Object::draw()
 {
-    glm::mat4 modelMatrix = Matrix_Identity(); // Transformação identidade de modelagem
     modelMatrix = Matrix_Translate(pos.x,pos.y,pos.z)
               * Matrix_Rotate_Z(rot.x)
               * Matrix_Rotate_Y(rot.y)

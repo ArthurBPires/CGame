@@ -7,23 +7,37 @@
 in vec4 position_world;
 in vec4 normal;
 
+in vec4 position_model;
+
+in vec2 texcoords;
+
+in vec3 gouraud_color;
+
 // Matrizes computadas no código C++ e enviadas para a GPU
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
 // Identificador que define qual objeto está sendo desenhado no momento
-#define SPHERE 0
-#define BUNNY  1
-#define PLANE  2
-//uniform int object_id;
-uniform float spectral_values[10];
+uniform int object_id;
+uniform float spectral_values[12];
+
+uniform vec4 bbox_min;
+uniform vec4 bbox_max;
+
+uniform sampler2D TextureImage0;
 
 // O valor de saída ("out") de um Fragment Shader é a cor final do fragmento.
 out vec4 color;
 
+#define M_PI   3.14159265358979323846
+#define M_PI_2 1.57079632679489661923
+
 void main()
 {
+    //Carrega o tipo de iluminação do objeto
+    //1.0 => Blinn-Phong; 2.0 Phong
+    float illumModel = spectral_values[10];
     // Obtemos a posição da câmera utilizando a inversa da matriz que define o
     // sistema de coordenadas da câmera.
     vec4 origin = vec4(0.0, 0.0, 0.0, 1.0);
@@ -47,6 +61,10 @@ void main()
 
     // Vetor que define o sentido da câmera em relação ao ponto atual.
     vec4 v = normalize(camera_position - p);
+
+    //Definição do half-vector.
+    vec4 h = normalize(v + l);
+
     // Vetor que define o sentido da reflexão especular ideal.
     vec4 r = vec4(0.0,0.0,0.0,0.0); // PREENCHA AQUI o vetor de reflexão especular ideal
 
@@ -77,30 +95,108 @@ void main()
     vec3 ambient_term = vec3(0.0,0.0,0.0); // PREENCHA AQUI o termo ambiente
     ambient_term = Ka*Ia;
 
-    // Termo especular utilizando o modelo de iluminação de Phong
-    vec3 phong_specular_term  = vec3(0.0,0.0,0.0); // PREENCH AQUI o termo especular de Phong
-    phong_specular_term = Ks*I* pow(max(0,dot(r,v)),q);
+    float U = 0.0;
+    float V = 0.0;
 
-    // NOTE: Se você quiser fazer o rendering de objetos transparentes, é
-    // necessário:
-    // 1) Habilitar a operação de "blending" de OpenGL logo antes de realizar o
-    //    desenho dos objetos transparentes, com os comandos abaixo no código C++:
-    //      glEnable(GL_BLEND);
-    //      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    // 2) Realizar o desenho de todos objetos transparentes *após* ter desenhado
-    //    todos os objetos opacos; e
-    // 3) Realizar o desenho de objetos transparentes ordenados de acordo com
-    //    suas distâncias para a câmera (desenhando primeiro objetos
-    //    transparentes que estão mais longe da câmera).
-    // Alpha default = 1 = 100% opaco = 0% transparente
-    color.a = 1;
+    if(illumModel == 1.0){
+        if(object_id == 0 /*|| object_id == 2*/){
+            vec3 blinnPhongSpecTerm = vec3(0.0, 0.0, 0.0);
+            blinnPhongSpecTerm = Ks*I*pow(dot(n, h), q);
 
-    // Cor final do fragmento calculada com uma combinação dos termos difuso,
-    // especular, e ambiente. Veja slide 129 do documento Aula_17_e_18_Modelos_de_Iluminacao.pdf.
-    color.rgb = lambert_diffuse_term + ambient_term + phong_specular_term;
+            color.a = 1;
 
-    // Cor final com correção gamma, considerando monitor sRGB.
-    // Veja https://en.wikipedia.org/w/index.php?title=Gamma_correction&oldid=751281772#Windows.2C_Mac.2C_sRGB_and_TV.2Fvideo_standard_gammas
-    color.rgb = pow(color.rgb, vec3(1.0,1.0,1.0)/2.2);
+            color.rgb = lambert_diffuse_term + ambient_term + blinnPhongSpecTerm;
+
+            color.rgb = pow(color.rgb, vec3(1.0,1.0,1.0)/2.2);
+            //color.rgb = vec3(0.0, 0.0, 1.0);
+        }
+        else if(object_id == 1){
+            float minx = bbox_min.x;
+            float maxx = bbox_max.x;
+
+            float miny = bbox_min.y;
+            float maxy = bbox_max.y;
+
+            float minz = bbox_min.z;
+            float maxz = bbox_max.z;
+
+            U = (position_model.x-minx)/(maxx-minx);
+            V = (position_model.y-miny)/(maxy-miny);
+
+            vec3 Kd0 = texture(TextureImage0, vec2(U,V)).rgb;
+
+            float lambert = max(0,dot(n,l));
+
+            color.rgb = Kd0 * (lambert + 0.01);
+
+            color.a = 1;
+
+            color.rgb = pow(color.rgb, vec3(1.0,1.0,1.0)/2.2);
+            //color.rgb = vec3(1.0, 1.0, 0.0);
+        }
+        else{
+            color.a = 1;
+            color.rgb = gouraud_color;
+        }
+    }
+    else{
+        //if(object_id == 0){
+            // Termo especular utilizando o modelo de iluminação de Phong
+            vec3 phong_specular_term  = vec3(0.0,0.0,0.0); // PREENCH AQUI o termo especular de Phong
+            phong_specular_term = Ks*I* pow(max(0,dot(r,v)),q);
+
+            // NOTE: Se você quiser fazer o rendering de objetos transparentes, é
+            // necessário:
+            // 1) Habilitar a operação de "blending" de OpenGL logo antes de realizar o
+            //    desenho dos objetos transparentes, com os comandos abaixo no código C++:
+            //      glEnable(GL_BLEND);
+            //      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            // 2) Realizar o desenho de todos objetos transparentes *após* ter desenhado
+            //    todos os objetos opacos; e
+            // 3) Realizar o desenho de objetos transparentes ordenados de acordo com
+            //    suas distâncias para a câmera (desenhando primeiro objetos
+            //    transparentes que estão mais longe da câmera).
+            // Alpha default = 1 = 100% opaco = 0% transparente
+            color.a = 1;
+
+            // Cor final do fragmento calculada com uma combinação dos termos difuso,
+            // especular, e ambiente. Veja slide 129 do documento Aula_17_e_18_Modelos_de_Iluminacao.pdf.
+            color.rgb = lambert_diffuse_term + ambient_term + phong_specular_term;
+
+            // Cor final com correção gamma, considerando monitor sRGB.
+            // Veja https://en.wikipedia.org/w/index.php?title=Gamma_correction&oldid=751281772#Windows.2C_Mac.2C_sRGB_and_TV.2Fvideo_standard_gammas
+            color.rgb = pow(color.rgb, vec3(1.0,1.0,1.0)/2.2);
+            //color.rgb = vec3(0.0, 1.0, 0.0);
+        //}
+        /*else{
+            vec4 bbox_center = (bbox_min + bbox_max) / 2.0;
+
+            float ro = 1.0f;
+
+            float norm_p = length(position_model - bbox_center);
+
+            vec4 p_line = bbox_center +
+            ro*(position_model-bbox_center)/norm_p;
+
+            vec4 p_vec = p_line - bbox_center;
+
+            float theta = atan(p_vec.x, p_vec.z);
+            float phi = asin(p_vec.y/ro);
+
+            U = (theta + M_PI)/(2*M_PI);
+            V = (phi + (M_PI/2))/M_PI;
+
+            vec3 Kd0 = texture(TextureImage0, vec2(U,V)).rgb;
+
+            float lambert = max(0,dot(n,l));
+
+            color.rgb = Kd0 * (lambert + 0.01);
+
+            color.a = 1;
+
+            color.rgb = pow(color.rgb, vec3(1.0,1.0,1.0)/2.2);
+            //color.rgb = vec3(1.0, 0.0, 0.0);
+        }*/
+    }
 }
 

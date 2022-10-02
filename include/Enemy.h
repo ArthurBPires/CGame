@@ -15,6 +15,7 @@ class Enemy : public Dyn_Object
 {
     public:
         int hp = 100;
+        float timeInvulnerable = 0;
         float speed = 1.5;
         float maxSpeed = 1.0;
 

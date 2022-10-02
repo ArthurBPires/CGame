@@ -4,6 +4,7 @@
 #include "Player.h"
 #include "Camera.h"
 #include "Timer.h"
+#include "weapons.h"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -21,6 +22,7 @@ class Scene
         static Player * player;
         static std::vector<Enemy *> enemies;
         static std::vector<Object *> objects;
+        static Book * book;
 
         static Configuration * config;
 
@@ -44,6 +46,7 @@ class Scene
 Configuration * Scene::config = &g_config;
 Camera * Scene::camera = NULL;
 Player * Scene::player = NULL;
+Book * Scene::book = NULL;
 std::vector<Enemy *> Scene::enemies;
 std::vector<Object *> Scene::objects;
 
@@ -237,6 +240,8 @@ void Scene::renderOther()
     // Imprimimos na tela informação sobre o número de quadros renderizados
     // por segundo (frames per second).
     TextRendering_ShowFramesPerSecond(window);
+
+    TextRendering_ShowPlayerStats(window, Scene::player->hp, Scene::book->level);
 
     // O framebuffer onde OpenGL executa as operações de renderização não
     // é o mesmo que está sendo mostrado para o usuário, caso contrário

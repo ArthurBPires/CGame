@@ -5,6 +5,8 @@
 #include "Camera.h"
 #include "scene.h"
 #include "Timer.h"
+#include "collisions.h"
+#include "weapons.h"
 #include <iostream>
 
 void dynamic()
@@ -19,29 +21,66 @@ void dynamic()
 
         while(deltaTime >= 1.0)
         {
+            if(Scene::player->timeInvulnerable > 0){
+                Scene::player->timeInvulnerable -= 1;
+            }
+            if(Scene::player->timeInvulnerable < 0){
+                Scene::player->timeInvulnerable = 0;
+            }
+
             for(auto & object : Scene::objects)
             {
                 object->move();
             }
             for(auto & enemy : Scene::enemies)
             {
-                enemy->pathfinding();
+                if(enemy->shouldDraw){
+                    if(enemy->timeInvulnerable > 0){
+                        enemy->timeInvulnerable -= 1;
+                    }
+                    if(enemy->timeInvulnerable < 0){
+                        enemy->timeInvulnerable = 0;
+                    }
 
-                //In here, we give a repulsion to enemies close to player
-                vec4 distVec = Scene::player->pos - enemy->pos;
-                if(norm(distVec) < 1.2)
-                {
-                    enemy->velocity = (4.0f * normalize(-distVec));
-                }
-                //In here, we give collision to enemies
-                for(auto & enemy2 : Scene::enemies)
-                {
-                    if(enemy != enemy2)
+                    enemy->pathfinding();
+
+                    //In here, we give a repulsion to enemies close to player
+                    vec4 distVec = Scene::player->pos - enemy->pos;
+                    vec4 distBook = Scene::book->pos - enemy->pos;
+                    if(norm(distVec) < 1.2)
                     {
-                        vec4 distEnem = enemy2->pos - enemy->pos;
-                        if(norm(distEnem) < 1.2)
+                        enemy->velocity = (4.0f * normalize(-distVec));
+                        if(Scene::player->timeInvulnerable == 0){
+                            Scene::player->hp -= 10;
+                            Scene::player->timeInvulnerable = 10;
+                        }
+                    }
+                    //Weapon collision detection
+                    if(norm(distBook) < 1.2)
+                    {
+                        enemy->velocity = (Scene::book->valKnbck*normalize(-distVec));
+                        if(enemy->timeInvulnerable == 0){
+                            enemy->hp -= Scene::book->contactDmg;
+                            enemy->timeInvulnerable = 3;
+
+                            if(enemy->hp <= 0){
+                                enemy->hp = 0;
+                                enemy->shouldDraw = false;
+
+                                Scene::book->updateLevel(true);
+                            }
+                        }
+                    }
+                    //In here, we give collision to enemies
+                    for(auto & enemy2 : Scene::enemies)
+                    {
+                        if(enemy != enemy2)
                         {
-                            enemy->pos += (3.0f * normalize(-distEnem) * Scene::config->t);
+                            vec4 distEnem = enemy2->pos - enemy->pos;
+                            if(norm(distEnem) < 1.2)
+                            {
+                                enemy->pos += (3.0f * normalize(-distEnem) * Scene::config->t);
+                            }
                         }
                     }
                 }
@@ -63,6 +102,7 @@ void Scene::test()
     float speed = 4.0;
     player = new Player("bunny",vec3(0.08,0.4,0.8),vec3(0.8,0.8,0.8),vec3(0.04,0.2,0.4),32.0,100,speed);
     Scene::player->pos.x = 6.0;
+    Scene::player->timeInvulnerable = 0;
 
     //Scene::objects.push_back(player);
 
@@ -73,28 +113,36 @@ void Scene::test()
     //Scene::objects.push_back(camera);
 
     //Adds sphere in pos(-1.0,0.0,0.0);
-    Dyn_Object sphere("sphere");
-    sphere.pos.x = -1.0;
+    //Dyn_Object sphere("sphere");
+    //sphere.pos.x = -1.0;
 
     //Gives it acceleration;
-    sphere.acceleration = 0.1f * normalize(vec4(0.0,0.0,-1.0,0.0));
-    Scene::objects.push_back(&sphere);
+    //sphere.acceleration = 0.1f * normalize(vec4(0.0,0.0,-1.0,0.0));
+    //Scene::objects.push_back(&sphere);
+
+    //Spawns the book weapon
+    book = new Book("sphere", vec4(Scene::player->pos.x, Scene::player->pos.y, Scene::player->pos.z - 4.0, 1.0), vec3(0.0,0.0,0.0), vec3(1.0, 1.0, 1.0), vec3(1.0, 0.0, 0.0), vec3(0.0, 1.0, 0.0), vec3(0.0, 0.0, 1.0), 2.0);
+    book->updateLevel(true);
+    book->angleVal = 0;
 
     //Ground
     Scene::objects.push_back(new Object("plane",vec4(0.0,-1.00,0.0,1.0),vec3(0.0,0.0,0.0),vec3(20.0,1.0,20.0),vec3(0.2,0.7,0.15),vec3(0.1,0.1,0.1),vec3(0.0,0.0,0.0),20.0));
 
+    //Carregamento da textura das árvores
+    LoadTextureImage("../../data/teste_3.png");
+
     //Trees
-    Scene::objects.push_back(new Object("tree_cone",vec4(1.0,-1.0,1.0,1.0),vec3(0.0,0.0,0.0),vec3(3.0,3.0,3.0),vec3(0.0,0.5,0.1),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),5.0));
-    Scene::objects.push_back(new Object("tree_cone",vec4(5.0,-1.0,8.0,1.0),vec3(0.0,0.0,0.0),vec3(2.0,2.0,2.0),vec3(0.0,0.5,0.1),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),5.0));
-    Scene::objects.push_back(new Object("tree_cone",vec4(-4.0,-1.0,7.0,1.0),vec3(0.0,0.0,0.0),vec3(3.5,3.5,3.5),vec3(0.0,0.5,0.1),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),5.0));
-    Scene::objects.push_back(new Object("tree_cone",vec4(-3.0,-1.0,-5.0,1.0),vec3(0.0,0.0,0.0),vec3(2.0,2.0,2.0),vec3(0.0,0.5,0.1),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),5.0));
-    Scene::objects.push_back(new Object("tree_cone",vec4(2.0,-1.0,-9.0,1.0),vec3(0.0,0.0,0.0),vec3(4.0,4.0,4.0),vec3(0.0,0.5,0.1),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),5.0));
-    Scene::objects.push_back(new Object("tree_cone",vec4(13.0,-1.0,-8.0,1.0),vec3(0.0,0.0,0.0),vec3(3.5,3.5,3.5),vec3(0.0,0.5,0.1),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),5.0));
-    Scene::objects.push_back(new Object("tree_cone",vec4(16.0,-1.0,-12.0,1.0),vec3(0.0,0.0,0.0),vec3(2.0,2.8,2.0),vec3(0.0,0.5,0.1),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),5.0));
-    Scene::objects.push_back(new Object("tree_cone",vec4(8.0,-1.0,-16.0,1.0),vec3(0.0,0.0,0.0),vec3(2.2,2.2,2.2),vec3(0.0,0.5,0.1),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),5.0));
+    Scene::objects.push_back(new Object("tree_cone",vec4(1.0,-1.0,1.0,1.0),vec3(0.0,0.0,0.0),vec3(3.0,3.0,3.0),vec3(0.0,0.5,0.1),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),5.0, 2.0, 1.0));
+    Scene::objects.push_back(new Object("tree_cone",vec4(5.0,-1.0,8.0,1.0),vec3(0.0,0.0,0.0),vec3(2.0,2.0,2.0),vec3(0.0,0.5,0.1),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),5.0, 2.0, 1.0));
+    Scene::objects.push_back(new Object("tree_cone",vec4(-4.0,-1.0,7.0,1.0),vec3(0.0,0.0,0.0),vec3(3.5,3.5,3.5),vec3(0.0,0.5,0.1),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),5.0, 2.0, 1.0));
+    Scene::objects.push_back(new Object("tree_cone",vec4(-3.0,-1.0,-5.0,1.0),vec3(0.0,0.0,0.0),vec3(2.0,2.0,2.0),vec3(0.0,0.5,0.1),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),5.0, 2.0, 1.0));
+    Scene::objects.push_back(new Object("tree_cone",vec4(2.0,-1.0,-9.0,1.0),vec3(0.0,0.0,0.0),vec3(4.0,4.0,4.0),vec3(0.0,0.5,0.1),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),5.0, 1.0, 1.0));
+    Scene::objects.push_back(new Object("tree_cone",vec4(13.0,-1.0,-8.0,1.0),vec3(0.0,0.0,0.0),vec3(3.5,3.5,3.5),vec3(0.0,0.5,0.1),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),5.0, 1.0, 1.0));
+    Scene::objects.push_back(new Object("tree_cone",vec4(16.0,-1.0,-12.0,1.0),vec3(0.0,0.0,0.0),vec3(2.0,2.8,2.0),vec3(0.0,0.5,0.1),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),5.0, 1.0, 1.0));
+    Scene::objects.push_back(new Object("tree_cone",vec4(8.0,-1.0,-16.0,1.0),vec3(0.0,0.0,0.0),vec3(2.2,2.2,2.2),vec3(0.0,0.5,0.1),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),5.0, 1.0, 1.0));
 
     //Rocks
-    Scene::objects.push_back(new Object("rock_cube",vec4(0.0,-1.0,0.0,1.0),vec3(0.0,0.0,0.0),vec3(1.0,1.0,1.0),vec3(0.5,0.4,0.3),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),2.0));
+    Scene::objects.push_back(new Object("rock_cube",vec4(0.0,-1.0,0.0,1.0),vec3(0.0,0.0,0.0),vec3(1.0,1.0,1.0),vec3(0.5,0.4,0.3),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),2.0, 2.0, 0.0));
     Scene::objects.push_back(new Object("rock_cube",vec4(4.0,-1.0,-18.0,1.0),vec3(0.0,0.0,0.0),vec3(1.0,2.0,2.4),vec3(0.5,0.4,0.3),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),2.0));
 
     //Enemies
@@ -122,11 +170,17 @@ void Scene::test()
         deltaTime += (nowTime - lastTime) / Scene::config->t;
         lastTime = nowTime;
 
+        //printf("%d\n", Scene::player->hp);
+
         // Aqui executamos as operações de renderização
         Scene::renderBaseline();
 
         camera->draw();
         //player->draw();
+
+        book->action(deltaTime, Scene::player->pos);
+        book->draw();
+
         if(camera->type != FREE)
             player->draw();
 
@@ -139,10 +193,16 @@ void Scene::test()
 
         for(auto & object : objects)
         {
-            object->draw();
+            if(object->shouldDraw){
+                object->draw();
+            }
         }
 
         Scene::renderOther();
+
+        if(Scene::player->hp <= 0){
+            glfwSetWindowShouldClose(window, GL_TRUE);
+        }
     }
 
     Scene::clearObjects();

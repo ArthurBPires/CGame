@@ -38,13 +38,9 @@ class Dyn_Object : public Object
 //When implemented, should be divided by TIME_STEP
 void Dyn_Object::move()
 {
-    //auto newTime = Clock::now();
-    //duration<float, std::milli> diff = newTime - timer;
-    //float t = diff.count()/1000.0f;
     float t = g_config.t;
     this->pos += this->velocity * t;
     this->velocity += this->acceleration * t;
-    //timer = newTime;
 }
 
 Dyn_Object::~Dyn_Object()

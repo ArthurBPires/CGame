@@ -104,6 +104,7 @@
 			<Add directory="lib" />
 		</Linker>
 		<Unit filename="include/Camera.h" />
+		<Unit filename="include/Configuration.h" />
 		<Unit filename="include/Dyn_Object.h" />
 		<Unit filename="include/Enemy.h" />
 		<Unit filename="include/GLFW/glfw3.h" />
@@ -113,6 +114,7 @@
 		<Unit filename="include/Player.h" />
 		<Unit filename="include/Scene.h" />
 		<Unit filename="include/Timer.h" />
+		<Unit filename="include/collisions.h" />
 		<Unit filename="include/dejavufont.h" />
 		<Unit filename="include/glad/glad.h" />
 		<Unit filename="include/glm/CMakeLists.txt" />
@@ -384,6 +386,7 @@
 		<Unit filename="include/utils.h" />
 		<Unit filename="include/weapons.h" />
 		<Unit filename="maps/test.h" />
+		<Unit filename="src/collisions.cpp" />
 		<Unit filename="src/glad.c">
 			<Option compilerVar="CC" />
 		</Unit>

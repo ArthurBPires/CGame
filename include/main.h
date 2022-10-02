@@ -6,7 +6,7 @@
 #include <cstdio>
 #include <cstdlib>
 
-// Headers abaixo s„o especÌficos de C++
+// Headers abaixo s√£o espec√≠ficos de C++
 #include <map>
 #include <stack>
 #include <string>
@@ -18,10 +18,10 @@
 #include <algorithm>
 
 // Headers das bibliotecas OpenGL
-#include <glad/glad.h>   // CriaÁ„o de contexto OpenGL 3.3
-#include <GLFW/glfw3.h>  // CriaÁ„o de janelas do sistema operacional
+#include <glad/glad.h>   // Cria√ß√£o de contexto OpenGL 3.3
+#include <GLFW/glfw3.h>  // Cria√ß√£o de janelas do sistema operacional
 
-// Headers da biblioteca GLM: criaÁ„o de matrizes e vetores.
+// Headers da biblioteca GLM: cria√ß√£o de matrizes e vetores.
 #include <glm/mat4x4.hpp>
 #include <glm/vec4.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -51,36 +51,36 @@ GLuint g_NumLoadedTextures = 0;
 
 GLFWwindow* window;
 
-// Raz„o de proporÁ„o da janela (largura/altura). Veja funÁ„o FramebufferSizeCallback().
+// Raz√£o de propor√ß√£o da janela (largura/altura). Veja fun√ß√£o FramebufferSizeCallback().
 float g_ScreenRatio = 1.0f;
 
-// Vari·veis que definem a c‚mera em coordenadas esfÈricas, controladas pelo
-// usu·rio atravÈs do mouse (veja funÁ„o CursorPosCallback()). A posiÁ„o
-// efetiva da c‚mera È calculada dentro da funÁ„o main(), dentro do loop de
-// renderizaÁ„o.
-float g_CameraTheta = 0.0f; // ¬ngulo no plano ZX em relaÁ„o ao eixo Z
-float g_CameraPhi = 0.0f;   // ¬ngulo em relaÁ„o ao eixo Y
-float g_CameraDistance = 3.5f; // Dist‚ncia da c‚mera para a origem
+// Vari√°veis que definem a c√¢mera em coordenadas esf√©ricas, controladas pelo
+// usu√°rio atrav√©s do mouse (veja fun√ß√£o CursorPosCallback()). A posi√ß√£o
+// efetiva da c√¢mera √© calculada dentro da fun√ß√£o main(), dentro do loop de
+// renderiza√ß√£o.
+float g_CameraTheta = 0.0f; // √Çngulo no plano ZX em rela√ß√£o ao eixo Z
+float g_CameraPhi = 0.0f;   // √Çngulo em rela√ß√£o ao eixo Y
+float g_CameraDistance = 3.5f; // Dist√¢ncia da c√¢mera para a origem
 
-// ¬ngulos de Euler que controlam a rotaÁ„o de um dos cubos da cena virtual
+// √Çngulos de Euler que controlam a rota√ß√£o de um dos cubos da cena virtual
 float g_AngleX = 0.0f;
 float g_AngleY = 0.0f;
 float g_AngleZ = 0.0f;
 
-// Vari·vel que controla o tipo de projeÁ„o utilizada: perspectiva ou ortogr·fica.
+// Vari√°vel que controla o tipo de proje√ß√£o utilizada: perspectiva ou ortogr√°fica.
 bool g_UsePerspectiveProjection = true;
 
-// Vari·vel que controla se o texto informativo ser· mostrado na tela.
+// Vari√°vel que controla se o texto informativo ser√° mostrado na tela.
 bool g_ShowInfoText = true;
 
-//void LoadShadersFromFiles(); // Carrega os shaders de vÈrtice e fragmento, criando um programa de GPU
+//void LoadShadersFromFiles(); // Carrega os shaders de v√©rtice e fragmento, criando um programa de GPU
 GLuint LoadShader_Vertex(const char* filename);   // Carrega um vertex shader
 GLuint LoadShader_Fragment(const char* filename); // Carrega um fragment shader
 GLuint CreateGpuProgram(GLuint vertex_shader_id, GLuint fragment_shader_id); // Cria um programa de GPU
-void LoadShader(const char* filename, GLuint shader_id); // FunÁ„o utilizada pelas duas acima
+void LoadShader(const char* filename, GLuint shader_id); // Fun√ß√£o utilizada pelas duas acima
 
-// DeclaraÁ„o de funÁıes auxiliares para renderizar texto dentro da janela
-// OpenGL. Estas funÁıes est„o definidas no arquivo "textrendering.cpp".
+// Declara√ß√£o de fun√ß√µes auxiliares para renderizar texto dentro da janela
+// OpenGL. Estas fun√ß√µes est√£o definidas no arquivo "textrendering.cpp".
 void TextRendering_Init();
 float TextRendering_LineHeight(GLFWwindow* window);
 float TextRendering_CharWidth(GLFWwindow* window);
@@ -91,21 +91,22 @@ void TextRendering_PrintMatrixVectorProduct(GLFWwindow* window, glm::mat4 M, glm
 void TextRendering_PrintMatrixVectorProductMoreDigits(GLFWwindow* window, glm::mat4 M, glm::vec4 v, float x, float y, float scale = 1.0f);
 void TextRendering_PrintMatrixVectorProductDivW(GLFWwindow* window, glm::mat4 M, glm::vec4 v, float x, float y, float scale = 1.0f);
 
-// FunÁıes abaixo renderizam como texto na janela OpenGL algumas matrizes e
-// outras informaÁıes do programa. Definidas apÛs main().
+// Fun√ß√µes abaixo renderizam como texto na janela OpenGL algumas matrizes e
+// outras informa√ß√µes do programa. Definidas ap√≥s main().
 void TextRendering_ShowEulerAngles(GLFWwindow* window);
 void TextRendering_ShowProjection(GLFWwindow* window);
 void TextRendering_ShowFramesPerSecond(GLFWwindow* window);
 
-// Estrutura que representa um modelo geomÈtrico carregado a partir de um
+// Estrutura que representa um modelo geom√©trico carregado a partir de um
 // arquivo ".obj". Veja https://en.wikipedia.org/wiki/Wavefront_.obj_file .
 struct ObjModel
 {
     tinyobj::attrib_t                 attrib;
     std::vector<tinyobj::shape_t>     shapes;
     std::vector<tinyobj::material_t>  materials;
+    std::vector<glm::vec4>            hitbox;
 
-    // Este construtor lÍ o modelo de um arquivo utilizando a biblioteca tinyobjloader.
+    // Este construtor l√™ o modelo de um arquivo utilizando a biblioteca tinyobjloader.
     // Veja: https://github.com/syoyo/tinyobjloader
     ObjModel(const char* filename, const char* basepath = NULL, bool triangulate = true)
     {
@@ -120,12 +121,104 @@ struct ObjModel
         if (!ret)
             throw std::runtime_error("Erro ao carregar modelo.");
 
+        makeHitbox();
+
         printf("OK.\n");
+    }
+
+    void makeHitbox()
+    {
+        glm::vec4 pointMax(0,0,0,1.0f);
+        glm::vec4 pointMin(std::numeric_limits<float>::max(),std::numeric_limits<float>::max(),std::numeric_limits<float>::max(),1.0f);
+
+        for (size_t v = 0; v < attrib.vertices.size() / 3; v++) {
+            glm::vec4 point;
+            point.x = static_cast<const double>(attrib.vertices[3 * v + 0]);
+            point.y = static_cast<const double>(attrib.vertices[3 * v + 1]);
+            point.z = static_cast<const double>(attrib.vertices[3 * v + 2]);
+            point.w = 1.0f;
+
+            if(point.x < pointMin.x)
+            {
+                pointMin.x = point.x;
+            }
+            if(point.y < pointMin.y)
+            {
+                pointMin.y = point.y;
+            }
+            if(point.z < pointMin.z)
+            {
+                pointMin.z = point.z;
+            }
+
+            if(point.x > pointMax.x)
+            {
+                pointMax.x = point.x;
+            }
+            if(point.y > pointMax.y)
+            {
+                pointMax.y = point.y;
+            }
+            if(point.z > pointMax.z)
+            {
+                pointMax.z = point.z;
+            }
+        }
+        float adjustVal = 0.75f;
+
+        glm::vec4 point1 = glm::vec4(pointMax);
+        point1 = adjustVal * point1;
+        point1.w = 1.0f;
+        hitbox.push_back(point1);
+
+        glm::vec4 point2 = glm::vec4(pointMin);
+        point2 = adjustVal * point2;
+        point2.w = 1.0f;
+        hitbox.push_back(glm::vec4(point2));
+
+        glm::vec4 point3 = glm::vec4(pointMax.x,pointMax.y,pointMin.z,1.0f);
+        point3 = adjustVal * point3;
+        point3.w = 1.0f;
+        hitbox.push_back(glm::vec4(point3));
+
+        glm::vec4 point4 = glm::vec4(pointMax.x,pointMin.y,pointMax.z,1.0f);
+        point4 = adjustVal * point4;
+        point4.w = 1.0f;
+        hitbox.push_back(glm::vec4(point4));
+
+        glm::vec4 point5 = glm::vec4(pointMin.x,pointMax.y,pointMax.z,1.0f);
+        point5 = adjustVal * point5;
+        point5.w = 1.0f;
+        hitbox.push_back(glm::vec4(point5));
+
+        glm::vec4 point6 = glm::vec4(pointMax.x,pointMin.y,pointMin.z,1.0f);
+        point6 = adjustVal * point6;
+        point6.w = 1.0f;
+        hitbox.push_back(glm::vec4(point6));
+
+        glm::vec4 point7 = glm::vec4(pointMin.x,pointMin.y,pointMax.z,1.0f);
+        point7 = adjustVal * point7;
+        point7.w = 1.0f;
+        hitbox.push_back(glm::vec4(point7));
+
+        glm::vec4 point8 = glm::vec4(pointMin.x,pointMax.y,pointMin.z,1.0f);
+        point8 = adjustVal * point8;
+        point8.w = 1.0f;
+        hitbox.push_back(glm::vec4(point8));
+
+        /*
+        printf("%f\n",norm(hitbox.at(0) - hitbox.at(1)));
+        printf("%f\n",norm(hitbox.at(1) - hitbox.at(2)));
+        printf("%f\n",norm(hitbox.at(2) - hitbox.at(3)));
+        printf("%f\n",norm(hitbox.at(3) - hitbox.at(4)));
+        printf("%f\n",norm(hitbox.at(5) - hitbox.at(6)));
+        printf("%f\n",norm(hitbox.at(6) - hitbox.at(7)));
+        */
     }
 };
 
-// FunÁ„o para debugging: imprime no terminal todas informaÁıes de um modelo
-// geomÈtrico carregado de um arquivo ".obj".
+// Fun√ß√£o para debugging: imprime no terminal todas informa√ß√µes de um modelo
+// geom√©trico carregado de um arquivo ".obj".
 // Veja: https://github.com/syoyo/tinyobjloader/blob/22883def8db9ef1f3ffb9b404318e7dd25fdbb51/loader_example.cc#L98
 void PrintObjModelInfo(ObjModel* model)
 {
@@ -293,25 +386,28 @@ void PrintObjModelInfo(ObjModel* model)
   }
 }
 
-// Definimos uma estrutura que armazenar· dados necess·rios para renderizar
+// Definimos uma estrutura que armazenar√° dados necess√°rios para renderizar
 // cada objeto da cena virtual.
 struct SceneObject
 {
     std::string  name;        // Nome do objeto
-    size_t       first_index; // Õndice do primeiro vÈrtice dentro do vetor indices[] definido em BuildTrianglesAndAddToVirtualScene()
-    size_t       num_indices; // N˙mero de Ìndices do objeto dentro do vetor indices[] definido em BuildTrianglesAndAddToVirtualScene()
-    GLenum       rendering_mode; // Modo de rasterizaÁ„o (GL_TRIANGLES, GL_TRIANGLE_STRIP, etc.)
-    GLuint       vertex_array_object_id; // ID do VAO onde est„o armazenados os atributos do modelo
+    size_t       first_index; // √çndice do primeiro v√©rtice dentro do vetor indices[] definido em BuildTrianglesAndAddToVirtualScene()
+    size_t       num_indices; // N√∫mero de √≠ndices do objeto dentro do vetor indices[] definido em BuildTrianglesAndAddToVirtualScene()
+    GLenum       rendering_mode; // Modo de rasteriza√ß√£o (GL_TRIANGLES, GL_TRIANGLE_STRIP, etc.)
+    GLuint       vertex_array_object_id; // ID do VAO onde est√£o armazenados os atributos do modelo
+
     glm::vec3 bbox_min;
     glm::vec3 bbox_max;
+
+    std::vector<glm::vec4> hitbox;
 };
 
-// A cena virtual È uma lista de objetos nomeados, guardados em um dicion·rio
-// (map).  Veja dentro da funÁ„o BuildTrianglesAndAddToVirtualScene() como que s„o incluÌdos
-// objetos dentro da vari·vel g_VirtualScene, e veja na funÁ„o main() como
-// estes s„o acessados.
-// FunÁ„o que desenha um objeto armazenado em g_VirtualScene. Veja definiÁ„o
-// dos objetos na funÁ„o BuildTrianglesAndAddToVirtualScene().
+// A cena virtual √© uma lista de objetos nomeados, guardados em um dicion√°rio
+// (map).  Veja dentro da fun√ß√£o BuildTrianglesAndAddToVirtualScene() como que s√£o inclu√≠dos
+// objetos dentro da vari√°vel g_VirtualScene, e veja na fun√ß√£o main() como
+// estes s√£o acessados.
+// Fun√ß√£o que desenha um objeto armazenado em g_VirtualScene. Veja defini√ß√£o
+// dos objetos na fun√ß√£o BuildTrianglesAndAddToVirtualScene().
 std::map<std::string, SceneObject> g_VirtualScene;
 
 
@@ -319,14 +415,14 @@ std::map<std::string, SceneObject> g_VirtualScene;
 void DrawVirtualObject(const char* object_name)
 {
     // "Ligamos" o VAO. Informamos que queremos utilizar os atributos de
-    // vÈrtices apontados pelo VAO criado pela funÁ„o BuildTrianglesAndAddToVirtualScene(). Veja
-    // coment·rios detalhados dentro da definiÁ„o de BuildTrianglesAndAddToVirtualScene().
+    // v√©rtices apontados pelo VAO criado pela fun√ß√£o BuildTrianglesAndAddToVirtualScene(). Veja
+    // coment√°rios detalhados dentro da defini√ß√£o de BuildTrianglesAndAddToVirtualScene().
     glBindVertexArray(g_VirtualScene[object_name].vertex_array_object_id);
 
-    // Pedimos para a GPU rasterizar os vÈrtices dos eixos XYZ
-    // apontados pelo VAO como linhas. Veja a definiÁ„o de
-    // g_VirtualScene[""] dentro da funÁ„o BuildTrianglesAndAddToVirtualScene(), e veja
-    // a documentaÁ„o da funÁ„o glDrawElements() em
+    // Pedimos para a GPU rasterizar os v√©rtices dos eixos XYZ
+    // apontados pelo VAO como linhas. Veja a defini√ß√£o de
+    // g_VirtualScene[""] dentro da fun√ß√£o BuildTrianglesAndAddToVirtualScene(), e veja
+    // a documenta√ß√£o da fun√ß√£o glDrawElements() em
     // http://docs.gl/gl3/glDrawElements.
     glDrawElements(
         g_VirtualScene[object_name].rendering_mode,
@@ -335,22 +431,22 @@ void DrawVirtualObject(const char* object_name)
         (void*)(g_VirtualScene[object_name].first_index * sizeof(GLuint))
     );
 
-    // "Desligamos" o VAO, evitando assim que operaÁıes posteriores venham a
+    // "Desligamos" o VAO, evitando assim que opera√ß√µes posteriores venham a
     // alterar o mesmo. Isso evita bugs.
     glBindVertexArray(0);
 }
 
-// FunÁ„o que computa as normais de um ObjModel, caso elas n„o tenham sido
+// Fun√ß√£o que computa as normais de um ObjModel, caso elas n√£o tenham sido
 // especificadas dentro do arquivo ".obj"
 void ComputeNormals(ObjModel* model)
 {
     if ( !model->attrib.normals.empty() )
         return;
 
-    // Primeiro computamos as normais para todos os TRI¬NGULOS.
-    // Segundo, computamos as normais dos V…RTICES atravÈs do mÈtodo proposto
-    // por Gouraud, onde a normal de cada vÈrtice vai ser a mÈdia das normais de
-    // todas as faces que compartilham este vÈrtice.
+    // Primeiro computamos as normais para todos os TRI√ÇNGULOS.
+    // Segundo, computamos as normais dos V√âRTICES atrav√©s do m√©todo proposto
+    // por Gouraud, onde a normal de cada v√©rtice vai ser a m√©dia das normais de
+    // todas as faces que compartilham este v√©rtice.
 
     size_t num_vertices = model->attrib.vertices.size() / 3;
 
@@ -379,8 +475,8 @@ void ComputeNormals(ObjModel* model)
             const glm::vec4  b = vertices[1];
             const glm::vec4  c = vertices[2];
 
-            // PREENCHA AQUI o c·lculo da normal de um tri‚ngulo cujos vÈrtices
-            // est„o nos pontos "a", "b", e "c", definidos no sentido anti-hor·rio.
+            // PREENCHA AQUI o c√°lculo da normal de um tri√¢ngulo cujos v√©rtices
+            // est√£o nos pontos "a", "b", e "c", definidos no sentido anti-hor√°rio.
             const glm::vec4  n = crossproduct(b - a,c-a);
 
             for (size_t vertex = 0; vertex < 3; ++vertex)
@@ -405,7 +501,7 @@ void ComputeNormals(ObjModel* model)
     }
 }
 
-// ConstrÛi tri‚ngulos para futura renderizaÁ„o a partir de um ObjModel.
+// Constr√≥i tri√¢ngulos para futura renderiza√ß√£o a partir de um ObjModel.
 void BuildTrianglesAndAddToVirtualScene(ObjModel* model)
 {
      GLuint vertex_array_object_id;
@@ -454,10 +550,10 @@ void BuildTrianglesAndAddToVirtualScene(ObjModel* model)
                 bbox_max.y = std::max(bbox_max.y, vy);
                 bbox_max.z = std::max(bbox_max.z, vz);
 
-                // Inspecionando o cÛdigo da tinyobjloader, o aluno Bernardo
+                // Inspecionando o c√≥digo da tinyobjloader, o aluno Bernardo
                 // Sulzbach (2017/1) apontou que a maneira correta de testar se
-                // existem normais e coordenadas de textura no ObjModel È
-                // comparando se o Ìndice retornado È -1. Fazemos isso abaixo.
+                // existem normais e coordenadas de textura no ObjModel √©
+                // comparando se o √≠ndice retornado √© -1. Fazemos isso abaixo.
 
                 if ( idx.normal_index != -1 )
                 {
@@ -484,13 +580,16 @@ void BuildTrianglesAndAddToVirtualScene(ObjModel* model)
 
         SceneObject theobject;
         theobject.name           = model->shapes[shape].name;
-        theobject.first_index    = first_index; // Primeiro Ìndice
-        theobject.num_indices    = last_index - first_index + 1; // N˙mero de indices
-        theobject.rendering_mode = GL_TRIANGLES;       // Õndices correspondem ao tipo de rasterizaÁ„o GL_TRIANGLES.
+        theobject.first_index    = first_index; // Primeiro √≠ndice
+        theobject.num_indices    = last_index - first_index + 1; // N√∫mero de indices
+        theobject.rendering_mode = GL_TRIANGLES;       // √çndices correspondem ao tipo de rasteriza√ß√£o GL_TRIANGLES.
         theobject.vertex_array_object_id = vertex_array_object_id;
+
 
         theobject.bbox_min = bbox_min;
         theobject.bbox_max = bbox_max;
+
+        theobject.hitbox = model->hitbox;
 
         g_VirtualScene[model->shapes[shape].name] = theobject;
     }
@@ -537,27 +636,27 @@ void BuildTrianglesAndAddToVirtualScene(ObjModel* model)
     GLuint indices_id;
     glGenBuffers(1, &indices_id);
 
-    // "Ligamos" o buffer. Note que o tipo agora È GL_ELEMENT_ARRAY_BUFFER.
+    // "Ligamos" o buffer. Note que o tipo agora √© GL_ELEMENT_ARRAY_BUFFER.
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_id);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), NULL, GL_STATIC_DRAW);
     glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, indices.size() * sizeof(GLuint), indices.data());
     // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // XXX Errado!
     //
 
-    // "Desligamos" o VAO, evitando assim que operaÁıes posteriores venham a
+    // "Desligamos" o VAO, evitando assim que opera√ß√µes posteriores venham a
     // alterar o mesmo. Isso evita bugs.
     glBindVertexArray(0);
 }
 
 
 
-// FunÁ„o que carrega os shaders de vÈrtices e de fragmentos que ser„o
-// utilizados para renderizaÁ„o. Veja slides 180-200 do documento Aula_03_Rendering_Pipeline_Grafico.pdf.
+// Fun√ß√£o que carrega os shaders de v√©rtices e de fragmentos que ser√£o
+// utilizados para renderiza√ß√£o. Veja slides 180-200 do documento Aula_03_Rendering_Pipeline_Grafico.pdf.
 //
 void LoadShadersFromFiles()
 {
     // Note que o caminho para os arquivos "shader_vertex.glsl" e
-    // "shader_fragment.glsl" est„o fixados, sendo que assumimos a existÍncia
+    // "shader_fragment.glsl" est√£o fixados, sendo que assumimos a exist√™ncia
     // da seguinte estrutura no sistema de arquivos:
     //
     //    + FCG_Lab_01/
@@ -584,23 +683,23 @@ void LoadShadersFromFiles()
     // Criamos um programa de GPU utilizando os shaders carregados acima.
     program_id = CreateGpuProgram(vertex_shader_id, fragment_shader_id);
 
-    // Buscamos o endereÁo das vari·veis definidas dentro do Vertex Shader.
-    // Utilizaremos estas vari·veis para enviar dados para a placa de vÌdeo
+    // Buscamos o endere√ßo das vari√°veis definidas dentro do Vertex Shader.
+    // Utilizaremos estas vari√°veis para enviar dados para a placa de v√≠deo
     // (GPU)! Veja arquivo "shader_vertex.glsl" e "shader_fragment.glsl".
-    model_uniform           = glGetUniformLocation(program_id, "model"); // Vari·vel da matriz "model"
-    view_uniform            = glGetUniformLocation(program_id, "view"); // Vari·vel da matriz "view" em shader_vertex.glsl
-    projection_uniform      = glGetUniformLocation(program_id, "projection"); // Vari·vel da matriz "projection" em shader_vertex.glsl
-    object_id_uniform       = glGetUniformLocation(program_id, "object_id"); // Vari·vel "object_id" em shader_fragment.glsl
-    spectral_values_uniform       = glGetUniformLocation(program_id, "spectral_values"); // Vari·vel "spectral_values" em shader_fragment.glsl
+    model_uniform           = glGetUniformLocation(program_id, "model"); // Vari√°vel da matriz "model"
+    view_uniform            = glGetUniformLocation(program_id, "view"); // Vari√°vel da matriz "view" em shader_vertex.glsl
+    projection_uniform      = glGetUniformLocation(program_id, "projection"); // Vari√°vel da matriz "projection" em shader_vertex.glsl
+    object_id_uniform       = glGetUniformLocation(program_id, "object_id"); // Vari√°vel "object_id" em shader_fragment.glsl
+    spectral_values_uniform       = glGetUniformLocation(program_id, "spectral_values"); // Vari√°vel "spectral_values" em shader_fragment.glsl
     bbox_min_uniform        = glGetUniformLocation(program_id, "bbox_min");
     bbox_max_uniform        = glGetUniformLocation(program_id, "bbox_max");
 }
 
-// Carrega um Vertex Shader de um arquivo GLSL. Veja definiÁ„o de LoadShader() abaixo.
+// Carrega um Vertex Shader de um arquivo GLSL. Veja defini√ß√£o de LoadShader() abaixo.
 GLuint LoadShader_Vertex(const char* filename)
 {
     // Criamos um identificador (ID) para este shader, informando que o mesmo
-    // ser· aplicado nos vÈrtices.
+    // ser√° aplicado nos v√©rtices.
     GLuint vertex_shader_id = glCreateShader(GL_VERTEX_SHADER);
 
     // Carregamos e compilamos o shader
@@ -610,11 +709,11 @@ GLuint LoadShader_Vertex(const char* filename)
     return vertex_shader_id;
 }
 
-// Carrega um Fragment Shader de um arquivo GLSL . Veja definiÁ„o de LoadShader() abaixo.
+// Carrega um Fragment Shader de um arquivo GLSL . Veja defini√ß√£o de LoadShader() abaixo.
 GLuint LoadShader_Fragment(const char* filename)
 {
     // Criamos um identificador (ID) para este shader, informando que o mesmo
-    // ser· aplicado nos fragmentos.
+    // ser√° aplicado nos fragmentos.
     GLuint fragment_shader_id = glCreateShader(GL_FRAGMENT_SHADER);
 
     // Carregamos e compilamos o shader
@@ -624,12 +723,12 @@ GLuint LoadShader_Fragment(const char* filename)
     return fragment_shader_id;
 }
 
-// FunÁ„o auxilar, utilizada pelas duas funÁıes acima. Carrega cÛdigo de GPU de
-// um arquivo GLSL e faz sua compilaÁ„o.
+// Fun√ß√£o auxilar, utilizada pelas duas fun√ß√µes acima. Carrega c√≥digo de GPU de
+// um arquivo GLSL e faz sua compila√ß√£o.
 void LoadShader(const char* filename, GLuint shader_id)
 {
-    // Lemos o arquivo de texto indicado pela vari·vel "filename"
-    // e colocamos seu conte˙do em memÛria, apontado pela vari·vel
+    // Lemos o arquivo de texto indicado pela vari√°vel "filename"
+    // e colocamos seu conte√∫do em mem√≥ria, apontado pela vari√°vel
     // "shader_string".
     std::ifstream file;
     try {
@@ -645,25 +744,25 @@ void LoadShader(const char* filename, GLuint shader_id)
     const GLchar* shader_string = str.c_str();
     const GLint   shader_string_length = static_cast<GLint>( str.length() );
 
-    // Define o cÛdigo do shader GLSL, contido na string "shader_string"
+    // Define o c√≥digo do shader GLSL, contido na string "shader_string"
     glShaderSource(shader_id, 1, &shader_string, &shader_string_length);
 
-    // Compila o cÛdigo do shader GLSL (em tempo de execuÁ„o)
+    // Compila o c√≥digo do shader GLSL (em tempo de execu√ß√£o)
     glCompileShader(shader_id);
 
-    // Verificamos se ocorreu algum erro ou "warning" durante a compilaÁ„o
+    // Verificamos se ocorreu algum erro ou "warning" durante a compila√ß√£o
     GLint compiled_ok;
     glGetShaderiv(shader_id, GL_COMPILE_STATUS, &compiled_ok);
 
     GLint log_length = 0;
     glGetShaderiv(shader_id, GL_INFO_LOG_LENGTH, &log_length);
 
-    // Alocamos memÛria para guardar o log de compilaÁ„o.
-    // A chamada "new" em C++ È equivalente ao "malloc()" do C.
+    // Alocamos mem√≥ria para guardar o log de compila√ß√£o.
+    // A chamada "new" em C++ √© equivalente ao "malloc()" do C.
     GLchar* log = new GLchar[log_length];
     glGetShaderInfoLog(shader_id, log_length, &log_length, log);
 
-    // Imprime no terminal qualquer erro ou "warning" de compilaÁ„o
+    // Imprime no terminal qualquer erro ou "warning" de compila√ß√£o
     if ( log_length != 0 )
     {
         std::string  output;
@@ -690,18 +789,18 @@ void LoadShader(const char* filename, GLuint shader_id)
         fprintf(stderr, "%s", output.c_str());
     }
 
-    // A chamada "delete" em C++ È equivalente ao "free()" do C
+    // A chamada "delete" em C++ √© equivalente ao "free()" do C
     delete [] log;
 }
 
-// Esta funÁ„o cria um programa de GPU, o qual contÈm obrigatoriamente um
+// Esta fun√ß√£o cria um programa de GPU, o qual cont√©m obrigatoriamente um
 // Vertex Shader e um Fragment Shader.
 GLuint CreateGpuProgram(GLuint vertex_shader_id, GLuint fragment_shader_id)
 {
     // Criamos um identificador (ID) para este programa de GPU
     GLuint program_id = glCreateProgram();
 
-    // DefiniÁ„o dos dois shaders GLSL que devem ser executados pelo programa
+    // Defini√ß√£o dos dois shaders GLSL que devem ser executados pelo programa
     glAttachShader(program_id, vertex_shader_id);
     glAttachShader(program_id, fragment_shader_id);
 
@@ -718,8 +817,8 @@ GLuint CreateGpuProgram(GLuint vertex_shader_id, GLuint fragment_shader_id)
         GLint log_length = 0;
         glGetProgramiv(program_id, GL_INFO_LOG_LENGTH, &log_length);
 
-        // Alocamos memÛria para guardar o log de compilaÁ„o.
-        // A chamada "new" em C++ È equivalente ao "malloc()" do C.
+        // Alocamos mem√≥ria para guardar o log de compila√ß√£o.
+        // A chamada "new" em C++ √© equivalente ao "malloc()" do C.
         GLchar* log = new GLchar[log_length];
 
         glGetProgramInfoLog(program_id, log_length, &log_length, log);
@@ -731,13 +830,13 @@ GLuint CreateGpuProgram(GLuint vertex_shader_id, GLuint fragment_shader_id)
         output += log;
         output += "\n== End of link log\n";
 
-        // A chamada "delete" em C++ È equivalente ao "free()" do C
+        // A chamada "delete" em C++ √© equivalente ao "free()" do C
         delete [] log;
 
         fprintf(stderr, "%s", output.c_str());
     }
 
-    // Os "Shader Objects" podem ser marcados para deleÁ„o apÛs serem linkados
+    // Os "Shader Objects" podem ser marcados para dele√ß√£o ap√≥s serem linkados
     glDeleteShader(vertex_shader_id);
     glDeleteShader(fragment_shader_id);
 
@@ -745,7 +844,7 @@ GLuint CreateGpuProgram(GLuint vertex_shader_id, GLuint fragment_shader_id)
     return program_id;
 }
 
-// Escrevemos na tela os ‚ngulos de Euler definidos nas vari·veis globais
+// Escrevemos na tela os √¢ngulos de Euler definidos nas vari√°veis globais
 // g_AngleX, g_AngleY, e g_AngleZ.
 void TextRendering_ShowEulerAngles(GLFWwindow* window)
 {
@@ -760,7 +859,7 @@ void TextRendering_ShowEulerAngles(GLFWwindow* window)
     TextRendering_PrintString(window, buffer, -1.0f+pad/10, -1.0f+2*pad/10, 1.0f);
 }
 
-// Escrevemos na tela qual matriz de projeÁ„o est· sendo utilizada.
+// Escrevemos na tela qual matriz de proje√ß√£o est√° sendo utilizada.
 void TextRendering_ShowProjection(GLFWwindow* window)
 {
     if ( !g_ShowInfoText )
@@ -793,15 +892,15 @@ void TextRendering_ShowPlayerStats(GLFWwindow* window, int playerHp, int weaponL
     TextRendering_PrintString(window, levelPrintBuffer, 0.0f - 8*charwidth, 1.0f - lineheight, 1.0f);
 }
 
-// Escrevemos na tela o n˙mero de quadros renderizados por segundo (frames per
+// Escrevemos na tela o n√∫mero de quadros renderizados por segundo (frames per
 // second).
 void TextRendering_ShowFramesPerSecond(GLFWwindow* window)
 {
     if ( !g_ShowInfoText )
         return;
 
-    // Vari·veis est·ticas (static) mantÈm seus valores entre chamadas
-    // subsequentes da funÁ„o!
+    // Vari√°veis est√°ticas (static) mant√©m seus valores entre chamadas
+    // subsequentes da fun√ß√£o!
     static float old_seconds = (float)glfwGetTime();
     static int   ellapsed_frames = 0;
     static char  buffer[20] = "?? fps";
@@ -809,10 +908,10 @@ void TextRendering_ShowFramesPerSecond(GLFWwindow* window)
 
     ellapsed_frames += 1;
 
-    // Recuperamos o n˙mero de segundos que passou desde a execuÁ„o do programa
+    // Recuperamos o n√∫mero de segundos que passou desde a execu√ß√£o do programa
     float seconds = (float)glfwGetTime();
 
-    // N˙mero de segundos desde o ˙ltimo c·lculo do fps
+    // N√∫mero de segundos desde o √∫ltimo c√°lculo do fps
     float ellapsed_seconds = seconds - old_seconds;
 
     if ( ellapsed_seconds > 1.0f )
@@ -858,7 +957,7 @@ void LoadTextureImage(const char* filename)
     glSamplerParameteri(sampler_id, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glSamplerParameteri(sampler_id, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    // Par‚metros de amostragem da textura.
+    // Par√¢metros de amostragem da textura.
     glSamplerParameteri(sampler_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glSamplerParameteri(sampler_id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 

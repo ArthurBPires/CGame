@@ -8,6 +8,7 @@
 #include "collisions.h"
 #include "weapons.h"
 #include <iostream>
+#include <typeinfo>
 
 void dynamic()
 {
@@ -88,7 +89,6 @@ void dynamic()
 
             deltaTime--;
         }
-        //std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 }
 
@@ -96,25 +96,31 @@ void Scene::test()
 {
     double nowTime = 0, deltaTime = 0, lastTime = glfwGetTime();
 
-    Scene::renderInit(); // Inicilização dos procedimentos de renderização
-    Scene::loadModels(); // Construímos a representação de objetos geométricos através de malhas de triângulos
+    Scene::renderInit(); // InicilizaÃ§Ã£o dos procedimentos de renderizaÃ§Ã£o
+    Scene::loadModels(); // ConstruÃ­mos a representaÃ§Ã£o de objetos geomÃ©tricos atravÃ©s de malhas de triÃ¢ngulos
 
     float speed = 4.0;
     player = new Player("bunny",vec3(0.08,0.4,0.8),vec3(0.8,0.8,0.8),vec3(0.04,0.2,0.4),32.0,100,speed);
+
     Scene::player->pos.x = 6.0;
     Scene::player->timeInvulnerable = 0;
 
-    //Scene::objects.push_back(player);
+    player->hitBoxType = SPHERE;
+    player->sphereRadius = 1.2f;
+
+    Scene::objects.push_back(player);
 
     camera = new Camera(vec4(0.0,0.0,0.0,1.0));
     camera->lookat = &Scene::player->pos;
     camera->farplane = -50.0f;
+    camera->hitBoxType = NONE;
 
     //Scene::objects.push_back(camera);
 
     //Adds sphere in pos(-1.0,0.0,0.0);
-    //Dyn_Object sphere("sphere");
-    //sphere.pos.x = -1.0;
+
+    Dyn_Object sphere("sphere");
+    sphere.pos.x = -15.0;
 
     //Gives it acceleration;
     //sphere.acceleration = 0.1f * normalize(vec4(0.0,0.0,-1.0,0.0));
@@ -126,9 +132,11 @@ void Scene::test()
     book->angleVal = 0;
 
     //Ground
-    Scene::objects.push_back(new Object("plane",vec4(0.0,-1.00,0.0,1.0),vec3(0.0,0.0,0.0),vec3(20.0,1.0,20.0),vec3(0.2,0.7,0.15),vec3(0.1,0.1,0.1),vec3(0.0,0.0,0.0),20.0));
+    Object ground("plane",vec4(0.0,0.0,0.0,1.0),vec3(0.0,0.0,0.0),vec3(20.0,1.0,20.0),vec3(0.2,0.7,0.15),vec3(0.1,0.1,0.1),vec3(0.0,0.0,0.0),20.0);
+    ground.hitBoxType = NONE;
+    Scene::objects.push_back(&ground);
 
-    //Carregamento da textura das árvores
+    //Carregamento da textura das Ã¡rvores
     LoadTextureImage("../../data/teste_3.png");
 
     //Trees
@@ -144,6 +152,7 @@ void Scene::test()
     //Rocks
     Scene::objects.push_back(new Object("rock_cube",vec4(0.0,-1.0,0.0,1.0),vec3(0.0,0.0,0.0),vec3(1.0,1.0,1.0),vec3(0.5,0.4,0.3),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),2.0, 2.0, 0.0));
     Scene::objects.push_back(new Object("rock_cube",vec4(4.0,-1.0,-18.0,1.0),vec3(0.0,0.0,0.0),vec3(1.0,2.0,2.4),vec3(0.5,0.4,0.3),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),2.0));
+
 
     //Enemies
     Scene::enemies.push_back(new Enemy("bunny",vec3(0.8,0.4,0.4),vec3(0.8,0.8,0.8),vec3(0.8,0.2,0.2),32.0,100,1.5,1.0));
@@ -163,7 +172,7 @@ void Scene::test()
 
     std::thread(dynamic).detach();
 
-    // Ficamos em loop, renderizando, até que o usuário feche a janela
+    // Ficamos em loop, renderizando, atÃ© que o usuÃ¡rio feche a janela
     while (!glfwWindowShouldClose(window))
     {
         nowTime = glfwGetTime();
@@ -172,11 +181,11 @@ void Scene::test()
 
         //printf("%d\n", Scene::player->hp);
 
-        // Aqui executamos as operações de renderização
+        // Aqui executamos as operaÃ§Ãµes de renderizaÃ§Ã£o
         Scene::renderBaseline();
 
         camera->draw();
-        //player->draw();
+
 
         book->action(deltaTime, Scene::player->pos);
         book->draw();
@@ -184,6 +193,13 @@ void Scene::test()
         if(camera->type != FREE)
             player->draw();
 
+        for(auto * object : objects)
+        {
+            if(instanceof<Player>(object))
+                object->draw();
+            else if(camera->type != FREE)
+                object->draw();
+        }
 
         while(deltaTime >= 1.0)
         {
@@ -191,12 +207,16 @@ void Scene::test()
             deltaTime--;
         }
 
+
         for(auto & object : objects)
         {
             if(object->shouldDraw){
                 object->draw();
             }
         }
+        
+        if(g_HPressed)
+            drawHitbox();
 
         Scene::renderOther();
 

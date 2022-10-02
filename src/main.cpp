@@ -395,6 +395,11 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
         fprintf(stdout,"Shaders recarregados!\n");
         fflush(stdout);
     }
+    if (key == GLFW_KEY_H && action == GLFW_PRESS)
+    {
+        g_HPressed = !g_HPressed;
+    }
+
     g_CPressed = glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS;
 
     g_WPressed = glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS;

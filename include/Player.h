@@ -13,6 +13,7 @@ class Player : public Dyn_Object
     public:
         int hp = 100;
         float speed = 2.5;
+        float timeInvulnerable = 0;
 
         Player(std::string model,vec4 pos, vec3 rot, vec3 scl, vec3 Kd, vec3 Ks, vec3 Ka, float q, int hp = 100, float speed = 0.0025) :
             Dyn_Object(model,pos,rot,scl,Kd,Ks,Ka,q), hp(hp), speed(speed) {};

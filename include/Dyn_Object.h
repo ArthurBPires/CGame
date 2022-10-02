@@ -12,6 +12,9 @@ class Dyn_Object : public Object
         vec4 velocity = vec4(0.0,0.0,0.0,0.0);
         vec4 acceleration = vec4(0.0,0.0,0.0,0.0);
 
+        Dyn_Object(std::string model,vec4 pos, vec3 rot, vec3 scl, vec3 Kd, vec3 Ks, vec3 Ka, float q, float illumModel, float objID) :
+            Object(model,pos,rot,scl,Kd,Ks,Ka,q,illumModel,objID) {};
+
         Dyn_Object(std::string model,vec4 pos, vec3 rot, vec3 scl, vec3 Kd, vec3 Ks, vec3 Ka, float q) :
             Object(model,pos,rot,scl,Kd,Ks,Ka,q) {};
 

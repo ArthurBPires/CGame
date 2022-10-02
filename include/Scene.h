@@ -4,7 +4,10 @@
 #include "Player.h"
 #include "Camera.h"
 #include "Timer.h"
+
+#include "weapons.h"
 #include "collisions.h"
+
 
 #include <iostream>
 #include <string>
@@ -23,6 +26,7 @@ class Scene
         static Player * player;
         static std::vector<Enemy *> enemies;
         static std::vector<Object *> objects;
+        static Book * book;
 
         static Configuration * config;
 
@@ -46,6 +50,7 @@ class Scene
 Configuration * Scene::config = &g_config;
 Camera * Scene::camera = NULL;
 Player * Scene::player = NULL;
+Book * Scene::book = NULL;
 std::vector<Enemy *> Scene::enemies;
 std::vector<Object *> Scene::objects;
 
@@ -233,12 +238,12 @@ void Scene::keyEventHandler()
 
 void Scene::renderInit()
 {
-    // Carregamos os shaders de vértices e de fragmentos que serão utilizados
-    // para renderização. Veja slides 180-200 do documento Aula_03_Rendering_Pipeline_Grafico.pdf.
+    // Carregamos os shaders de vÃ©rtices e de fragmentos que serÃ£o utilizados
+    // para renderizaÃ§Ã£o. Veja slides 180-200 do documento Aula_03_Rendering_Pipeline_Grafico.pdf.
     //
     LoadShadersFromFiles();
 
-    // Inicializamos o código para renderização de texto.
+    // Inicializamos o cÃ³digo para renderizaÃ§Ã£o de texto.
     TextRendering_Init();
 
     // Habilitamos o Z-buffer. Veja slides 104-116 do documento Aula_09_Projecoes.pdf.
@@ -251,47 +256,49 @@ void Scene::renderInit()
 }
 void Scene::renderBaseline()
 {
-    // Definimos a cor do "fundo" do framebuffer como branco.  Tal cor é
-    // definida como coeficientes RGBA: Red, Green, Blue, Alpha; isto é:
-    // Vermelho, Verde, Azul, Alpha (valor de transparência).
-    // Conversaremos sobre sistemas de cores nas aulas de Modelos de Iluminação.
+    // Definimos a cor do "fundo" do framebuffer como branco.  Tal cor Ã©
+    // definida como coeficientes RGBA: Red, Green, Blue, Alpha; isto Ã©:
+    // Vermelho, Verde, Azul, Alpha (valor de transparÃªncia).
+    // Conversaremos sobre sistemas de cores nas aulas de Modelos de IluminaÃ§Ã£o.
     //
     //           R     G     B     A
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
     // "Pintamos" todos os pixels do framebuffer com a cor definida acima,
-    // e também resetamos todos os pixels do Z-buffer (depth buffer).
+    // e tambÃ©m resetamos todos os pixels do Z-buffer (depth buffer).
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Pedimos para a GPU utilizar o programa de GPU criado acima (contendo
-    // os shaders de vértice e fragmentos).
+    // os shaders de vÃ©rtice e fragmentos).
     glUseProgram(program_id);
 }
 
 void Scene::renderOther()
 {
-    // Imprimimos na tela os ângulos de Euler que controlam a rotação do
+    // Imprimimos na tela os Ã¢ngulos de Euler que controlam a rotaÃ§Ã£o do
     // terceiro cubo.
     TextRendering_ShowEulerAngles(window);
 
-    // Imprimimos na informação sobre a matriz de projeção sendo utilizada.
+    // Imprimimos na informaÃ§Ã£o sobre a matriz de projeÃ§Ã£o sendo utilizada.
     TextRendering_ShowProjection(window);
 
-    // Imprimimos na tela informação sobre o número de quadros renderizados
+    // Imprimimos na tela informaÃ§Ã£o sobre o nÃºmero de quadros renderizados
     // por segundo (frames per second).
     TextRendering_ShowFramesPerSecond(window);
 
-    // O framebuffer onde OpenGL executa as operações de renderização não
-    // é o mesmo que está sendo mostrado para o usuário, caso contrário
-    // seria possível ver artefatos conhecidos como "screen tearing". A
-    // chamada abaixo faz a troca dos buffers, mostrando para o usuário
-    // tudo que foi renderizado pelas funções acima.
+    TextRendering_ShowPlayerStats(window, Scene::player->hp, Scene::book->level);
+
+    // O framebuffer onde OpenGL executa as operaÃ§Ãµes de renderizaÃ§Ã£o nÃ£o
+    // Ã© o mesmo que estÃ¡ sendo mostrado para o usuÃ¡rio, caso contrÃ¡rio
+    // seria possÃ­vel ver artefatos conhecidos como "screen tearing". A
+    // chamada abaixo faz a troca dos buffers, mostrando para o usuÃ¡rio
+    // tudo que foi renderizado pelas funÃ§Ãµes acima.
     // Veja o link: Veja o link: https://en.wikipedia.org/w/index.php?title=Multiple_buffering&oldid=793452829#Double_buffering_in_computer_graphics
     glfwSwapBuffers(window);
 
-    // Verificamos com o sistema operacional se houve alguma interação do
-    // usuário (teclado, mouse, ...). Caso positivo, as funções de callback
-    // definidas anteriormente usando glfwSet*Callback() serão chamadas
+    // Verificamos com o sistema operacional se houve alguma interaÃ§Ã£o do
+    // usuÃ¡rio (teclado, mouse, ...). Caso positivo, as funÃ§Ãµes de callback
+    // definidas anteriormente usando glfwSet*Callback() serÃ£o chamadas
     // pela biblioteca GLFW.
     glfwPollEvents();
 }
@@ -364,7 +371,7 @@ void drawHitbox()
 
 
 
-        glm::mat4 modelMatrix = Matrix_Identity(); // Transformação identidade de modelagem
+        glm::mat4 modelMatrix = Matrix_Identity(); // TransformaÃ§Ã£o identidade de modelagem
 
         modelMatrix = Matrix_Translate(object->pos.x,object->pos.y,object->pos.z)
                   * Matrix_Rotate_Z(object->rot.x)

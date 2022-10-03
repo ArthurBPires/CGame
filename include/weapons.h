@@ -42,13 +42,13 @@ void Book::action(float deltaTime, vec4 posPlayer){
 };
 
 void Book::updateLevel(bool incLevel){
-    if(incLevel){
+    if(incLevel && level < 10){
         level += 1;
     }
 
     contactDmg = 10 + (level - 1)*2.0;
     angleSpeed = 0.005 + (level - 1)*0.001;
-    valKnbck = level;
+    valKnbck = 0.5 + (level - 1)*0.1;
 };
 //Fim das funções de Book
 

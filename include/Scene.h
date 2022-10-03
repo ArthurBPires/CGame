@@ -330,6 +330,10 @@ void Scene::loadModels()
     ComputeNormals(&model6);
     BuildTrianglesAndAddToVirtualScene(&model6);
 
+    ObjModel model7("../../data/golem.obj");
+    ComputeNormals(&model7);
+    BuildTrianglesAndAddToVirtualScene(&model7);
+
 }
 void Scene::loadModels(std::vector<std::string> paths)
 {
@@ -389,8 +393,8 @@ void drawHitbox()
             object->i++;
         }
 
-        float data_values[10] = {object->Kd.x,object->Kd.y,object->Kd.z,object->Ks.x,object->Ks.y,object->Ks.z,object->Ka.x,object->Ka.y,object->Ka.z,object->q};
-        glUniform1fv(spectral_values_uniform, 10, data_values);
+        float data_values[12] = {object->Kd.x,object->Kd.y,object->Kd.z,object->Ks.x,object->Ks.y,object->Ks.z,object->Ka.x,object->Ka.y,object->Ka.z,object->q,object->illumModel,object->objID};
+        glUniform1fv(spectral_values_uniform, 11, data_values);
 
         DrawVirtualObject(object_name.c_str());
 

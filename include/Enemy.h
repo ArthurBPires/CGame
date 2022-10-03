@@ -32,7 +32,7 @@ class Enemy : public Dyn_Object
         Enemy(std::string model, vec4 velocity, vec4 acceleration) : Dyn_Object(model,velocity,acceleration) {};
 
         void pathfinding();
-        static void spawn(int dist);
+        static void spawn(Enemy * newEnemy, int dist);
 
         ~Enemy();
 
@@ -41,12 +41,11 @@ class Enemy : public Dyn_Object
     private:
 };
 
-void Enemy::spawn(int dist = 15.0)
+void Enemy::spawn(Enemy * newEnemy,int dist = 15.0)
 {
     //value between -pi and +pi
     float delta = (-M_PI) + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(M_PI-(-M_PI))));
 
-    Enemy * newEnemy = new Enemy("bunny",vec3(0.8,0.4,0.4),vec3(0.8,0.8,0.8),vec3(0.8,0.2,0.2),32.0,100,1.5,1.0);
     newEnemy->pos.x = Scene::player->pos.x + (dist * cos(delta));
     newEnemy->pos.z = Scene::player->pos.z + (dist * sin(delta));
 

@@ -214,6 +214,7 @@ struct ObjModel
         printf("%f\n",norm(hitbox.at(5) - hitbox.at(6)));
         printf("%f\n",norm(hitbox.at(6) - hitbox.at(7)));
         */
+
     }
 };
 

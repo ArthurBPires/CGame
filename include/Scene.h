@@ -243,6 +243,10 @@ void Scene::renderInit()
     //
     LoadShadersFromFiles();
 
+    //Carregamento das texturas
+    LoadTextureImage("../../data/teste_3.png");
+    LoadTextureImage("../../data/teste_2.png");
+
     // Inicializamos o código para renderização de texto.
     TextRendering_Init();
 

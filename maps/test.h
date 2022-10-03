@@ -149,12 +149,9 @@ void Scene::test()
     Scene::objects.push_back(book);
 
     //Ground
-    Object ground("plane",vec4(0.0,0.0,0.0,1.0),vec3(0.0,0.0,0.0),vec3(20.0,1.0,20.0),vec3(0.2,0.7,0.15),vec3(0.1,0.1,0.1),vec3(0.0,0.0,0.0),20.0);
+    Object ground("plane",vec4(0.0,0.0,0.0,1.0),vec3(0.0,0.0,0.0),vec3(50.0,1.0,50.0),vec3(0.2,0.7,0.15),vec3(0.1,0.1,0.1),vec3(0.0,0.0,0.0),20.0);
     ground.hitBoxType = PLANE;
     Scene::objects.push_back(&ground);
-
-    //Carregamento da textura das árvores
-    LoadTextureImage("../../data/teste_3.png");
 
     //Trees
     Scene::objects.push_back(new Object("tree_cone",vec4(1.0,0.0,1.0,1.0),vec3(0.0,0.0,0.0),vec3(3.0,3.0,3.0),vec3(0.0,0.5,0.1),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),5.0, 2.0, 1.0));

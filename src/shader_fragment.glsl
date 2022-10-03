@@ -26,6 +26,7 @@ uniform vec4 bbox_min;
 uniform vec4 bbox_max;
 
 uniform sampler2D TextureImage0;
+uniform sampler2D TextureImage1;
 
 // O valor de saída ("out") de um Fragment Shader é a cor final do fragmento.
 out vec4 color;

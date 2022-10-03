@@ -135,6 +135,20 @@ void main()
             color.rgb = pow(color.rgb, vec3(1.0,1.0,1.0)/2.2);
             //color.rgb = vec3(1.0, 1.0, 0.0);
         }
+        else if(object_id == 3){
+            U = texcoords.x;
+            V = texcoords.y;
+
+            vec3 Kd0 = texture(TextureImage1, vec2(U,V)).rgb;
+
+            float lambert = max(0,dot(n,l));
+
+            color.rgb = Kd0 * (lambert + 0.01);
+
+            color.a = 1;
+
+            color.rgb = pow(color.rgb, vec3(1.0,1.0,1.0)/2.2);
+        }
         else{
             color.a = 1;
             color.rgb = gouraud_color;

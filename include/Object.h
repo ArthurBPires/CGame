@@ -78,6 +78,9 @@ void Object::draw()
     else if(model == "sphere"){
         glUniform1i(object_id_uniform, 2);
     }
+    else if(model == "plane"){
+        glUniform1i(object_id_uniform, 3);
+    }
     else{
         glUniform1i(object_id_uniform, 0);
     }

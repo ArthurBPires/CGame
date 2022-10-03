@@ -72,7 +72,10 @@ void Object::draw()
     float data_values[12] = {Kd.x,Kd.y,Kd.z,Ks.x,Ks.y,Ks.z,Ka.x,Ka.y,Ka.z,q,illumModel,objID};
     glUniform1fv(spectral_values_uniform, 11, data_values);
 
-    if(model == "bunny"){
+    if(q == 31){
+        glUniform1i(object_id_uniform, 4);
+    }
+    else if(model == "bunny"){
         glUniform1i(object_id_uniform, 1);
     }
     else if(model == "sphere"){

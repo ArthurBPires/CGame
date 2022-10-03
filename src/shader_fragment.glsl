@@ -135,9 +135,18 @@ void main()
             color.rgb = pow(color.rgb, vec3(1.0,1.0,1.0)/2.2);
             //color.rgb = vec3(1.0, 1.0, 0.0);
         }
-        else if(object_id == 3){
-            U = texcoords.x;
-            V = texcoords.y;
+        else if(object_id == 4){
+            float minx = bbox_min.x;
+            float maxx = bbox_max.x;
+
+            float miny = bbox_min.y;
+            float maxy = bbox_max.y;
+
+            float minz = bbox_min.z;
+            float maxz = bbox_max.z;
+
+            U = (position_model.x-minx)/(maxx-minx);
+            V = (position_model.y-miny)/(maxy-miny);
 
             vec3 Kd0 = texture(TextureImage1, vec2(U,V)).rgb;
 

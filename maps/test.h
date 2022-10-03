@@ -115,7 +115,7 @@ void Scene::test()
     Scene::loadModels(); // Construímos a representação de objetos geométricos através de malhas de triângulos
 
     float speed = 4.0;
-    player = new Player("bunny",vec3(0.08,0.4,0.8),vec3(0.8,0.8,0.8),vec3(0.04,0.2,0.4),32.0,100,speed);
+    player = new Player("bunny",vec3(0.08,0.4,0.8),vec3(0.8,0.8,0.8),vec3(0.04,0.2,0.4),31.0,100,speed);
 
     Scene::player->pos.x = 6.0;
     Scene::player->timeInvulnerable = 0;

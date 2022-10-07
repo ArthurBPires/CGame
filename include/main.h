@@ -886,18 +886,22 @@ void TextRendering_ShowProjection(GLFWwindow* window)
         TextRendering_PrintString(window, "Orthographic", 1.0f-13*charwidth, -1.0f+2*lineheight/10, 1.0f);
 }
 
-void TextRendering_ShowPlayerStats(GLFWwindow* window, int playerHp, int weaponLevel){
+void TextRendering_ShowPlayerStats(GLFWwindow* window, int playerHp, int bookLevel, int tornadoLevel){
     float lineheight = TextRendering_LineHeight(window);
     float charwidth = TextRendering_CharWidth(window);
     char lifePrintBuffer[8];
-    char levelPrintBuffer[17];
+    char levelPrintBuffer[33];
     char levelValueBuffer[3];
 
     itoa(playerHp, lifePrintBuffer, 10);
     strcat(lifePrintBuffer, "/100");
 
-    strcpy(levelPrintBuffer, "Weapon Level: ");
-    itoa(weaponLevel, levelValueBuffer, 10);
+    strcpy(levelPrintBuffer, "Book Level: ");
+    itoa(bookLevel, levelValueBuffer, 10);
+    strcat(levelPrintBuffer, levelValueBuffer);
+
+    strcat(levelPrintBuffer, " Tornado Level:");
+    itoa(tornadoLevel, levelValueBuffer, 10);
     strcat(levelPrintBuffer, levelValueBuffer);
 
     TextRendering_PrintString(window, lifePrintBuffer, -1.0f, 1.0f-lineheight, 1.0f);

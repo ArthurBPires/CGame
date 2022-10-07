@@ -27,6 +27,7 @@ class Scene
         static std::vector<Enemy *> enemies;
         static std::vector<Object *> objects;
         static Book * book;
+        static Tornado * tornado;
 
         static Configuration * config;
 
@@ -51,6 +52,7 @@ Configuration * Scene::config = &g_config;
 Camera * Scene::camera = NULL;
 Player * Scene::player = NULL;
 Book * Scene::book = NULL;
+Tornado * Scene::tornado = NULL;
 std::vector<Enemy *> Scene::enemies;
 std::vector<Object *> Scene::objects;
 
@@ -282,16 +284,16 @@ void Scene::renderOther()
 {
     // Imprimimos na tela os ângulos de Euler que controlam a rotação do
     // terceiro cubo.
-    TextRendering_ShowEulerAngles(window);
+    //TextRendering_ShowEulerAngles(window);
 
     // Imprimimos na informação sobre a matriz de projeção sendo utilizada.
-    TextRendering_ShowProjection(window);
+    //TextRendering_ShowProjection(window);
 
     // Imprimimos na tela informação sobre o número de quadros renderizados
     // por segundo (frames per second).
     TextRendering_ShowFramesPerSecond(window);
 
-    TextRendering_ShowPlayerStats(window, Scene::player->hp, Scene::book->level);
+    TextRendering_ShowPlayerStats(window, Scene::player->hp, Scene::book->level, Scene::tornado->level);
 
     // O framebuffer onde OpenGL executa as operações de renderização não
     // é o mesmo que está sendo mostrado para o usuário, caso contrário

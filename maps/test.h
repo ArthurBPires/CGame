@@ -78,6 +78,25 @@ void dynamic()
                             }
                         }
                     }
+                    if(Scene::tornado->isOut){
+                        if(Scene::tornado->isHit(Scene::tornado,enemy))
+                        {
+                            vec4 distTornado = Scene::tornado->pos - enemy->pos;
+                            vec4 distVec = Scene::player->pos - enemy->pos;
+                            enemy->velocity = (Scene::tornado->valKnbck*normalize(-distVec));
+                            if(enemy->timeInvulnerable == 0){
+                                enemy->hp -= Scene::tornado->contactDmg;
+                                enemy->timeInvulnerable = 3;
+
+                                if(enemy->hp <= 0){
+                                    enemy->hp = 0;
+                                    enemy->shouldDraw = false;
+
+                                    Scene::tornado->updateLevel(true);
+                                }
+                            }
+                        }
+                    }
                     //In here, we give collision to enemies
                     for(auto & enemy2 : Scene::enemies)
                     {
@@ -148,6 +167,11 @@ void Scene::test()
     book->angleVal = 0;
     Scene::objects.push_back(book);
 
+    //Spawns the tornado weapon
+    tornado = new Tornado("cube", vec4(Scene::player->pos.x, Scene::player->pos.y, Scene::player->pos.z + 4.0, 1.0), vec3(0.0,0.0,0.0), vec3(2.0, 2.0, 2.0), vec3(1.0, 1.0, 0.0), vec3(0.0, 1.0, 1.0), vec3(1.0, 0.0, 1.0), 3.0);
+    tornado->updateLevel(true);
+    Scene::objects.push_back(tornado);
+
     //Ground
     Object ground("plane",vec4(0.0,0.0,0.0,1.0),vec3(0.0,0.0,0.0),vec3(50.0,1.0,50.0),vec3(0.2,0.7,0.15),vec3(0.1,0.1,0.1),vec3(0.0,0.0,0.0),20.0);
     ground.hitBoxType = PLANE;
@@ -204,13 +228,21 @@ void Scene::test()
         camera->draw();
 
         book->action(deltaTime, Scene::player->pos);
+        tornado->action(deltaTime, Scene::player->pos);
 
         for(auto * object : objects)
         {
-            if(!instanceof<Player>(object))
-                object->draw();
-            else if(camera->type != FREE)
-                object->draw();
+            if(!instanceof<Tornado>(object)){
+                if(!instanceof<Player>(object))
+                    object->draw();
+                else if(camera->type != FREE)
+                    object->draw();
+            }
+        }
+
+        if(tornado->isOut){
+            printf("Tornado is out.\n");
+            tornado->draw();
         }
 
         while(deltaTime >= 1.0)

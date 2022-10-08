@@ -5,7 +5,7 @@
 
 using namespace glm;
 
-enum hitBoxType {BOX,SPHERE,PLANE,NONE};
+enum hitBoxType {BOX,SPHERE,PLANE,BOX_POINT,NONE};
 
 class Object
 {

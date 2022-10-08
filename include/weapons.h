@@ -36,7 +36,9 @@ class Book : public Weapon
 void Book::action(float deltaTime, vec4 posPlayer){
     angleVal = angleVal + deltaTime*angleSpeed;
 
-    pos.y = posPlayer.y;
+    rot += 0.02 * deltaTime;
+
+    pos.y = posPlayer.y + 1.0;
     pos.x = posPlayer.x + cos(angleVal)*4.0;
     pos.z = posPlayer.z - sin(angleVal)*4.0;
 };
@@ -47,8 +49,9 @@ void Book::updateLevel(bool incLevel){
     }
 
     contactDmg = 10 + (level - 1)*2.0;
-    angleSpeed = 0.005 + (level - 1)*0.001;
+    angleSpeed = 0.005 + (level - 1)*0.004;
     valKnbck = 0.5 + (level - 1)*0.1;
+    scl = vec3(1.0f,1.0f,1.0f) + ((level - 1) * 0.04f * vec3(1.0f,1.0f,1.0f));
 };
 //Fim das funções de Book
 
@@ -59,6 +62,7 @@ class Tornado : public Weapon{
         glm::vec4 trvlDir;
         float speed;
         float travelTime;
+        float maxTravelTime;
         float loadTime;
         float fireRate;
         float valKnbck;
@@ -73,9 +77,11 @@ void Tornado::action(float deltaTime, vec4 posPlayer){
     if(isOut){
         pos += speed*deltaTime*trvlDir;
 
+        rot.y += 0.04 * deltaTime;
+
         travelTime += deltaTime;
 
-        if(travelTime >= 500.0){
+        if(travelTime >= maxTravelTime){
             travelTime = 0;
             isOut = false;
             loadTime = 0;
@@ -96,13 +102,6 @@ void Tornado::action(float deltaTime, vec4 posPlayer){
         }
     }
 
-    if(isOut){
-        printf("Drawn: x:%f; z:%f\n", pos.x, pos.z);
-    }
-    else{
-        printf("Hidden: x:%f; z:%f\n", pos.x, pos.z);
-    }
-
 };
 
 void Tornado::updateLevel(bool incLevel){
@@ -110,10 +109,14 @@ void Tornado::updateLevel(bool incLevel){
         level += 1;
     }
 
-    contactDmg = 10 + (level - 1)*2.0;
-    speed = 0.03 + (level - 1)*0.01;
-    fireRate = 500 - (level - 1)*2;
-    valKnbck = 0.5 + (level - 1)*0.1;
+    contactDmg = 14 + (level - 1)*2.5;
+    speed = 0.05 + (level - 1)*0.015;
+    fireRate = 300 - (level - 1)*30;
+    maxTravelTime = 260 - (level - 1)*20;
+    if(maxTravelTime < 80)
+        maxTravelTime = 80;
+    valKnbck = 0.65 + (level - 1)*0.15;
+    scl = 1.2f*(vec3(1.0f,1.0f,1.0f) + ((level - 1) * 0.1f * vec3(1.0f,1.0f,1.0f)));
 };
 
 #endif // WEAPONS_H_INCLUDED

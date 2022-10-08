@@ -29,34 +29,12 @@ class Player : public Dyn_Object
 
         Player();
 
-        void userMove();
-
         ~Player();
 
     protected:
 
     private:
 };
-
-void Player::userMove()
-{
-    if (g_WPressed)
-    {
-        pos.z -= speed;
-    }
-    if (g_SPressed)
-    {
-        pos.z += speed;
-    }
-    if (g_APressed)
-    {
-        pos.x -= speed;
-    }
-    if (g_DPressed)
-    {
-        pos.x += speed;
-    }
-}
 
 Player::~Player()
 {

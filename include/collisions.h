@@ -91,6 +91,14 @@ bool Object::isHit(Object * obj1, Object * obj2)
     {
         result = isSphereHit(obj1,obj2,sphereRadius);
     }
+    else if(hitBoxType == BOX_POINT)
+    {
+        std::vector<glm::vec4> hitbox1 = obj1->hitbox;
+
+        for(int i = 0; i < (int)hitbox1.size(); i++)
+            hitbox1.at(i) = obj1->modelMatrix * hitbox1.at(i);
+        result = isInsideBox(obj2->pos, hitbox1);
+    }
 
     return result;
 }

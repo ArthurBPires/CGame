@@ -3,7 +3,6 @@
 
 #include "Player.h"
 #include "Camera.h"
-#include "Timer.h"
 
 #include "weapons.h"
 #include "collisions.h"
@@ -246,9 +245,9 @@ void Scene::renderInit()
     LoadShadersFromFiles();
 
     //Carregamento das texturas
-    LoadTextureImage("../../data/teste_2.png");
-    LoadTextureImage("../../data/teste_3.png");
-    LoadTextureImage("../../data/teste_4.jpg");
+    LoadTextureImage("../../data/lava.jpg");
+    LoadTextureImage("../../data/snow.jpg");
+    LoadTextureImage("../../data/grass.jpg");
 
     // Inicializamos o código para renderização de texto.
     TextRendering_Init();
@@ -340,6 +339,14 @@ void Scene::loadModels()
     ObjModel model7("../../data/golem.obj");
     ComputeNormals(&model7);
     BuildTrianglesAndAddToVirtualScene(&model7);
+
+    ObjModel model8("../../data/book.obj");
+    ComputeNormals(&model8);
+    BuildTrianglesAndAddToVirtualScene(&model8);
+
+    ObjModel model9("../../data/tornado.obj");
+    ComputeNormals(&model9);
+    BuildTrianglesAndAddToVirtualScene(&model9);
 
 }
 void Scene::loadModels(std::vector<std::string> paths)

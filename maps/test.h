@@ -4,7 +4,6 @@
 #include "enemy.h"
 #include "Camera.h"
 #include "scene.h"
-#include "Timer.h"
 #include "collisions.h"
 #include "weapons.h"
 #include <iostream>
@@ -36,6 +35,21 @@ void dynamic()
             for(auto & object : Scene::objects)
             {
                 object->move();
+
+                for(auto & object2 : Scene::objects)
+                {
+                    if(object != object2)
+                    {
+                        if(instanceof<Object>(object))
+                        {
+                            if(object->isHit(object,object2))
+                            {
+                                vec4 distObject = object->pos - object2->pos;
+                                object2->pos += (4.0f * normalize(-distObject) * Scene::config->t);
+                            }
+                        }
+                    }
+                }
             }
             for(auto * enemy : Scene::enemies)
             {
@@ -63,7 +77,6 @@ void dynamic()
                     //Weapon collision detection
                     if(Scene::book->isHit(Scene::book,enemy))
                     {
-                        vec4 distBook = Scene::book->pos - enemy->pos;
                         vec4 distVec = Scene::player->pos - enemy->pos;
                         enemy->velocity = (Scene::book->valKnbck*normalize(-distVec));
                         if(enemy->timeInvulnerable == 0){
@@ -81,7 +94,6 @@ void dynamic()
                     if(Scene::tornado->isOut){
                         if(Scene::tornado->isHit(Scene::tornado,enemy))
                         {
-                            vec4 distTornado = Scene::tornado->pos - enemy->pos;
                             vec4 distVec = Scene::player->pos - enemy->pos;
                             enemy->velocity = (Scene::tornado->valKnbck*normalize(-distVec));
                             if(enemy->timeInvulnerable == 0){
@@ -129,6 +141,7 @@ void Scene::test()
     int enemyAmount = 2;
     double hpMod = 1.0f;
     double sizeMod = 1.0f;
+    double speedMod = 1.0f;
 
     Scene::renderInit(); // Inicilização dos procedimentos de renderização
     Scene::loadModels(); // Construímos a representação de objetos geométricos através de malhas de triângulos
@@ -152,28 +165,19 @@ void Scene::test()
 
     //Scene::objects.push_back(camera);
 
-    //Adds sphere in pos(-1.0,0.0,0.0);
-
-    Dyn_Object sphere("sphere");
-    sphere.pos.x = -15.0;
-
-    //Gives it acceleration;
-    //sphere.acceleration = 0.1f * normalize(vec4(0.0,0.0,-1.0,0.0));
-    //Scene::objects.push_back(&sphere);
-
     //Spawns the book weapon
-    book = new Book("sphere", vec4(Scene::player->pos.x, Scene::player->pos.y, Scene::player->pos.z - 4.0, 1.0), vec3(0.0,0.0,0.0), vec3(1.0, 1.0, 1.0), vec3(1.0, 0.0, 0.0), vec3(0.0, 1.0, 0.0), vec3(0.0, 0.0, 1.0), 2.0);
+    book = new Book("book", vec4(Scene::player->pos.x, Scene::player->pos.y, Scene::player->pos.z - 4.0, 1.0), vec3(0.0,0.0,0.0), vec3(1.0, 1.0, 1.0), vec3(1.0, 0.0, 0.0), vec3(0.0, 1.0, 0.0), vec3(0.0, 0.0, 1.0), 2.0);
     book->updateLevel(true);
     book->angleVal = 0;
     Scene::objects.push_back(book);
 
     //Spawns the tornado weapon
-    tornado = new Tornado("cube", vec4(Scene::player->pos.x, Scene::player->pos.y, Scene::player->pos.z + 4.0, 1.0), vec3(0.0,0.0,0.0), vec3(2.0, 2.0, 2.0), vec3(1.0, 1.0, 0.0), vec3(0.0, 1.0, 1.0), vec3(1.0, 0.0, 1.0), 3.0);
+    tornado = new Tornado("tornado", vec4(Scene::player->pos.x, Scene::player->pos.y, Scene::player->pos.z + 4.0, 1.0), vec3(0.0,0.0,0.0), vec3(2.0, 2.0, 2.0), vec3(1.0, 1.0, 0.0), vec3(0.0, 1.0, 1.0), vec3(1.0, 0.0, 1.0), 3.0);
     tornado->updateLevel(true);
     Scene::objects.push_back(tornado);
 
     //Ground
-    Object ground("plane",vec4(0.0,0.0,0.0,1.0),vec3(0.0,0.0,0.0),vec3(50.0,1.0,50.0),vec3(0.2,0.7,0.15),vec3(0.1,0.1,0.1),vec3(0.0,0.0,0.0),20.0);
+    Object ground("plane",vec4(0.0,0.0,0.0,1.0),vec3(0.0,0.0,0.0),vec3(80.0,1.0,80.0),vec3(0.2,0.7,0.15),vec3(0.1,0.1,0.1),vec3(0.0,0.0,0.0),20.0);
     ground.hitBoxType = PLANE;
     Scene::objects.push_back(&ground);
 
@@ -197,12 +201,9 @@ void Scene::test()
     Scene::objects.push_back( Scene::enemies.back());
 
     Enemy::spawn(new Enemy("bunny",vec3(0.8,0.4,0.4),vec3(0.8,0.8,0.8),vec3(0.8,0.2,0.2),32.0,100,1.5,1.0));
-    Enemy::spawn(new Enemy("bunny",vec3(0.8,0.4,0.4),vec3(0.8,0.8,0.8),vec3(0.8,0.2,0.2),32.0,100,1.5,1.0));
 
     Enemy::spawn(new Enemy("bunny",vec3(0.8,0.4,0.4),vec3(0.8,0.8,0.8),vec3(0.8,0.2,0.2),32.0,100,1.5,1.0));
-    Enemy::spawn(new Enemy("bunny",vec3(0.8,0.4,0.4),vec3(0.8,0.8,0.8),vec3(0.8,0.2,0.2),32.0,100,1.5,1.0));
 
-    Enemy::spawn(new Enemy("bunny",vec3(0.8,0.4,0.4),vec3(0.8,0.8,0.8),vec3(0.8,0.2,0.2),32.0,100,1.5,1.0));
     Enemy::spawn(new Enemy("bunny",vec3(0.8,0.4,0.4),vec3(0.8,0.8,0.8),vec3(0.8,0.2,0.2),32.0,100,1.5,1.0));
 
     //Prints distance between enemies and player (for those recently spawned, should be 15)
@@ -227,9 +228,6 @@ void Scene::test()
 
         camera->draw();
 
-        book->action(deltaTime, Scene::player->pos);
-        tornado->action(deltaTime, Scene::player->pos);
-
         for(auto * object : objects)
         {
             if(!instanceof<Tornado>(object)){
@@ -241,12 +239,14 @@ void Scene::test()
         }
 
         if(tornado->isOut){
-            printf("Tornado is out.\n");
             tornado->draw();
         }
 
         while(deltaTime >= 1.0)
         {
+            book->action(deltaTime, Scene::player->pos);
+            tornado->action(deltaTime, Scene::player->pos);
+
             Scene::keyEventHandler();
             deltaTime--;
         }
@@ -260,16 +260,19 @@ void Scene::test()
         {
             for(int i=0; i< enemyAmount; i++)
             {
-                Enemy * enemy1 = new Enemy("golem",vec3(0.8,0.4,0.4),vec3(0.8,0.8,0.8),vec3(0.8,0.2,0.2),32.0,100,1.5,1.0);
+                Enemy * enemy1 = new Enemy("golem",vec3(0.5,0.4,0.3),vec3(0.0,0.0,0.0),vec3(0.1,0.2,0.1),2.0,100,1.5,1.0);
                 enemy1->scl = vec3(0.2,0.2,0.25);
                 enemy1->scl *= sizeMod;
                 enemy1->hp *= hpMod;
+                enemy1->speed *= speedMod;
+                enemy1->maxSpeed *= speedMod;
 
-                sizeMod *= 1.01;
-                hpMod *= 1.00;
-
-                Enemy::spawn(enemy1);
+                Enemy::spawn(enemy1,20.0);
             }
+
+            sizeMod *= 1.05;
+            hpMod *= 1.01;
+            speedMod *= 1.01;
 
             timer -= timeToSpawn;
         }
